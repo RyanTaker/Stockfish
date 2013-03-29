@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
+#include <iostream>
 
 #include "bitcount.h"
 #include "evaluate.h"
@@ -40,9 +41,13 @@ namespace {
     Pawns::Entry* pi;
 
     // attackedBy[color][piece type] is a bitboard representing all squares
-    // attacked by a given color and piece type, attackedBy[color][ALL_PIECES]
-    // contains all squares attacked by the given color.
+    // attacked by a given color and piece type, attackedBy[color][0] contains
+    // all squares attacked by the given color.
     Bitboard attackedBy[COLOR_NB][PIECE_TYPE_NB];
+
+	// controlledBy[color] is a board representing the squares controled by
+	// a certain color.
+	Bitboard controlledBy[COLOR_NB];
 
     // kingRing[color] is the zone around the king which is considered
     // by the king safety evaluation. This consists of the squares directly
@@ -88,7 +93,7 @@ namespace {
   //
   // Values modified by Joona Kiiski
   const Score WeightsInternal[] = {
-      S(252, 344), S(216, 266), S(46, 0)
+      S(252, 386), S(204, 250), S(96, 56)
   };
 
   // MobilityBonus[PieceType][attacked] contains mobility bonuses for middle and
@@ -96,20 +101,20 @@ namespace {
   // by friendly pieces.
   const Score MobilityBonus[][32] = {
      {}, {},
-     { S(-38,-33), S(-25,-23), S(-12,-13), S( 0, -3), S(12,  7), S(25, 17), // Knights
-       S( 31, 22), S( 38, 27), S( 38, 27) },
-     { S(-25,-30), S(-11,-16), S(  3, -2), S(17, 12), S(31, 26), S(45, 40), // Bishops
-       S( 57, 52), S( 65, 60), S( 71, 65), S(74, 69), S(76, 71), S(78, 73),
-       S( 79, 74), S( 80, 75), S( 81, 76), S(81, 76) },
+     { S(-52,-33), S(-17,-23), S(  0,-13), S( 9, -3), S(23,  7), S(29, 17), // Knights
+       S( 39, 22), S( 45, 27), S( 45, 27) },
+     { S(-55,-30), S(-20,-16), S( 10, -2), S( 28, 12), S(41, 26), S( 58, 40), // Bishops
+       S( 65, 52), S( 72, 60), S( 79, 65), S( 81, 69), S(92, 71), S(110, 73),
+       S(134, 74), S(157, 75), S(168, 76), S(194, 76) },
      { S(-20,-36), S(-14,-19), S( -8, -3), S(-2, 13), S( 4, 29), S(10, 46), // Rooks
        S( 14, 62), S( 19, 79), S( 23, 95), S(26,106), S(27,111), S(28,114),
        S( 29,116), S( 30,117), S( 31,118), S(32,118) },
-     { S(-10,-18), S( -8,-13), S( -6, -7), S(-3, -2), S(-1,  3), S( 1,  8), // Queens
-       S(  3, 13), S(  5, 19), S(  8, 23), S(10, 27), S(12, 32), S(15, 34),
-       S( 16, 35), S( 17, 35), S( 18, 35), S(20, 35), S(20, 35), S(20, 35),
-       S( 20, 35), S( 20, 35), S( 20, 35), S(20, 35), S(20, 35), S(20, 35),
-       S( 20, 35), S( 20, 35), S( 20, 35), S(20, 35), S(20, 35), S(20, 35),
-       S( 20, 35), S( 20, 35) }
+     { S(-30,-18), S(-18,-13), S(-10, -7), S( 0, -2), S( 5,  3), S(14,  8), // Queens
+       S( 19, 13), S( 21, 19), S( 21, 23), S(21, 27), S(21, 32), S(25, 34),
+       S( 27, 35), S( 28, 35), S( 29, 35), S(30, 35), S(35, 35), S(35, 35),
+       S( 35, 35), S( 35, 35), S( 35, 35), S(35, 35), S(35, 35), S(35, 35),
+       S( 35, 35), S( 35, 35), S( 35, 35), S(35, 35), S(35, 35), S(35, 35),
+       S( 35, 35), S( 35, 35) }
   };
 
   // OutpostBonus[PieceType][Square] contains outpost bonuses of knights and
@@ -142,6 +147,11 @@ namespace {
     { S(0, 0), S(15, 39), S(15, 39), S(15, 39), S(15, 39), S( 0,  0) }  // QUEEN
   };
 
+  const Score MainCenterBonus  = S(41, 0);
+  const Score SuperCenterBonus = S( 8, 0);
+
+  const Score KingDistanceDeduction = S(0, 8);
+
   // ThreatenedByPawnPenalty[PieceType] contains a penalty according to which
   // piece type is attacked by an enemy pawn.
   const Score ThreatenedByPawnPenalty[] = {
@@ -150,22 +160,22 @@ namespace {
 
   #undef S
 
-  const Score BishopPinBonus = make_score(66, 11);
+  const Score BishopPinBonus = make_score(121, 11);
 
   // Bonus for having the side to move (modified by Joona Kiiski)
-  const Score Tempo = make_score(24, 11);
+  const Score Tempo = make_score(24, 12);
 
   // Rooks and queens on the 7th rank
-  const Score RookOn7thBonus  = make_score(3, 20);
-  const Score QueenOn7thBonus = make_score(1,  8);
+  const Score RookOn7thBonus  = make_score(5, 17);
+  const Score QueenOn7thBonus = make_score(4, 14);
 
   // Rooks and queens attacking pawns on the same rank
-  const Score RookOnPawnBonus  = make_score(3, 48);
-  const Score QueenOnPawnBonus = make_score(1, 40);
+  const Score RookOnPawnBonus  = make_score(3, 20);
+  const Score QueenOnPawnBonus = make_score(1, 11);
 
   // Rooks on open files (modified by Joona Kiiski)
-  const Score RookOpenFileBonus     = make_score(43, 21);
-  const Score RookHalfOpenFileBonus = make_score(19, 10);
+  const Score RookOpenFileBonus     = make_score(49, 21);
+  const Score RookHalfOpenFileBonus = make_score(25, 12);
 
   // Penalty for rooks trapped inside a friendly king which has lost the
   // right to castle.
@@ -174,23 +184,55 @@ namespace {
   // Penalty for a bishop on a1/h1 (a8/h8 for black) which is trapped by
   // a friendly pawn on b2/g2 (b7/g7 for black). This can obviously only
   // happen in Chess960 games.
-  const Score TrappedBishopA1H1Penalty = make_score(100, 100);
+  const Score TrappedBishopA1H1Penalty = make_score(140, 200);
 
   // Penalty for an undefended bishop or knight
-  const Score UndefendedMinorPenalty = make_score(25, 10);
+  const Score UndefendedMinorPenalty = make_score(28, 10);
 
-  // The SpaceMask[Color] contains the area of the board which is considered
-  // by the space evaluation. In the middle game, each side is given a bonus
-  // based on how many squares inside this area are safe and available for
-  // friendly minor pieces.
-  const Bitboard SpaceMask[] = {
-    (1ULL << SQ_C2) | (1ULL << SQ_D2) | (1ULL << SQ_E2) | (1ULL << SQ_F2) |
-    (1ULL << SQ_C3) | (1ULL << SQ_D3) | (1ULL << SQ_E3) | (1ULL << SQ_F3) |
-    (1ULL << SQ_C4) | (1ULL << SQ_D4) | (1ULL << SQ_E4) | (1ULL << SQ_F4),
-    (1ULL << SQ_C7) | (1ULL << SQ_D7) | (1ULL << SQ_E7) | (1ULL << SQ_F7) |
-    (1ULL << SQ_C6) | (1ULL << SQ_D6) | (1ULL << SQ_E6) | (1ULL << SQ_F6) |
-    (1ULL << SQ_C5) | (1ULL << SQ_D5) | (1ULL << SQ_E5) | (1ULL << SQ_F5)
-  };
+  const Bitboard MainCenter =
+	  (1ULL << SQ_D5) | (1ULL << SQ_E5) |
+	  (1ULL << SQ_D4) | (1ULL << SQ_E4);
+
+  const Bitboard WhiteQueenside = 
+	(1ULL << SQ_A4) | (1ULL << SQ_B4) | (1ULL << SQ_C4) | (1ULL << SQ_D4) |
+	(1ULL << SQ_A3) | (1ULL << SQ_B3) | (1ULL << SQ_C3) | (1ULL << SQ_D3) |
+	(1ULL << SQ_A2) | (1ULL << SQ_B2) | (1ULL << SQ_C2) | (1ULL << SQ_D2) |
+	(1ULL << SQ_A1) | (1ULL << SQ_B1) | (1ULL << SQ_C1) | (1ULL << SQ_D1);
+
+  const Bitboard WhiteKingside = 
+	(1ULL << SQ_E4) | (1ULL << SQ_F4) | (1ULL << SQ_G4) | (1ULL << SQ_H4) |
+	(1ULL << SQ_E3) | (1ULL << SQ_F3) | (1ULL << SQ_G3) | (1ULL << SQ_H3) |
+	(1ULL << SQ_E2) | (1ULL << SQ_F2) | (1ULL << SQ_G2) | (1ULL << SQ_H2) |
+	(1ULL << SQ_E1) | (1ULL << SQ_F1) | (1ULL << SQ_G1) | (1ULL << SQ_H1);
+
+  const Bitboard BlackQueenside = 
+	(1ULL << SQ_A8) | (1ULL << SQ_B8) | (1ULL << SQ_C8) | (1ULL << SQ_D8) |
+	(1ULL << SQ_A7) | (1ULL << SQ_B7) | (1ULL << SQ_C7) | (1ULL << SQ_D7) |
+	(1ULL << SQ_A6) | (1ULL << SQ_B6) | (1ULL << SQ_C6) | (1ULL << SQ_D6) |
+	(1ULL << SQ_A5) | (1ULL << SQ_B5) | (1ULL << SQ_C5) | (1ULL << SQ_D5);
+
+  const Bitboard BlackKingside = 
+	(1ULL << SQ_E8) | (1ULL << SQ_F8) | (1ULL << SQ_G8) | (1ULL << SQ_H8) |
+	(1ULL << SQ_E7) | (1ULL << SQ_F7) | (1ULL << SQ_G7) | (1ULL << SQ_H7) |
+	(1ULL << SQ_E6) | (1ULL << SQ_F6) | (1ULL << SQ_G6) | (1ULL << SQ_H6) |
+	(1ULL << SQ_E5) | (1ULL << SQ_F5) | (1ULL << SQ_G5) | (1ULL << SQ_H5);
+
+  const Bitboard BoardEdge =
+	  (1ULL << SQ_A8) | (1ULL << SQ_B8) | (1ULL << SQ_C8) | (1ULL << SQ_D8) | (1ULL << SQ_E8) | (1ULL << SQ_F8) | (1ULL << SQ_G8) | (1ULL << SQ_H8) |
+	  (1ULL << SQ_A7)                                                       |                                                       (1ULL << SQ_H7) |
+	  (1ULL << SQ_A6)                                                       |                                                       (1ULL << SQ_H6) |
+	  (1ULL << SQ_A5)                                                       |                                                       (1ULL << SQ_H5) |
+      (1ULL << SQ_A4)                                                       |                                                       (1ULL << SQ_H4) |
+      (1ULL << SQ_A3)                                                       |                                                       (1ULL << SQ_H3) |
+      (1ULL << SQ_A2)                                                       |                                                       (1ULL << SQ_H2) |
+      (1ULL << SQ_A1) | (1ULL << SQ_B1) | (1ULL << SQ_C1) | (1ULL << SQ_D1) | (1ULL << SQ_E1) | (1ULL << SQ_F1) | (1ULL << SQ_G1) | (1ULL << SQ_H1);
+
+  const Bitboard EnemyKingside [COLOR_NB] = { BlackKingside,  WhiteKingside };
+  const Bitboard EnemyQueenside[COLOR_NB] = { BlackQueenside, WhiteQueenside };
+
+  const Bitboard SpaceMask[COLOR_NB] =
+     {(BlackKingside | BlackQueenside) & ~BoardEdge & ~MainCenter,
+	  (WhiteKingside | WhiteQueenside) & ~BoardEdge & ~MainCenter};
 
   // King danger constants and variables. The king danger scores are taken
   // from the KingDangerTable[]. Various little "meta-bonuses" measuring
@@ -199,7 +241,7 @@ namespace {
   //
   // King safety evaluation is asymmetrical and different for us (root color)
   // and for our opponent. These values are used to init KingDangerTable.
-  const int KingDangerWeights[] = { 259, 247 };
+	const int KingDangerWeights[] = { 279, 267 };
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
   const int KingAttackWeights[] = { 0, 0, 2, 2, 3, 5 };
@@ -235,7 +277,7 @@ namespace {
   std::stringstream TraceStream;
 
   enum TracedType {
-    PST = 8, IMBALANCE = 9, MOBILITY = 10, THREAT = 11,
+    PST = 8, SQRCONT = 16, IMBALANCE = 9, MOBILITY = 10, THREAT = 11,
     PASSED = 12, UNSTOPPABLE = 13, SPACE = 14, TOTAL = 15
   };
 
@@ -245,6 +287,13 @@ namespace {
 
   template<Color Us>
   void init_eval_info(const Position& pos, EvalInfo& ei);
+
+  void init_all_control(const Position& pos, EvalInfo& ei);
+
+  template<Color Us>
+  Bitboard basic_control_of_color(const Position& pos, EvalInfo& ei);
+
+  Score evaluate_square_control(const Position& pos, EvalInfo& ei);
 
   template<Color Us, bool Trace>
   Score evaluate_pieces_of_color(const Position& pos, EvalInfo& ei, Score& mobility);
@@ -335,7 +384,8 @@ namespace Eval {
                 <<             "                     |   MG    EG  |   MG    EG  |   MG     EG   \n"
                 <<             "---------------------+-------------+-------------+---------------\n";
 
-    trace_row("Material, PST, Tempo", PST);
+    trace_row("Material, Tempo", PST);
+	trace_row("Square Control", SQRCONT);
     trace_row("Material imbalance", IMBALANCE);
     trace_row("Pawns", PAWN);
     trace_row("Knights", KNIGHT);
@@ -406,6 +456,12 @@ Value do_evaluate(const Position& pos, Value& margin) {
 
   score += apply_weight(mobilityWhite - mobilityBlack, Weights[Mobility]);
 
+  // Configure square controll. Requires piece attack info.
+  init_all_control(pos, ei);
+
+  // Evaluate square control
+  score += evaluate_square_control(pos, ei);
+
   // Evaluate kings after all other pieces because we need complete attack
   // information when computing the king safety evaluation.
   score +=  evaluate_king<WHITE, Trace>(pos, ei, margins)
@@ -427,7 +483,16 @@ Value do_evaluate(const Position& pos, Value& margin) {
   if (ei.mi->space_weight())
   {
       int s = evaluate_space<WHITE>(pos, ei) - evaluate_space<BLACK>(pos, ei);
-      score += apply_weight(make_score(s * ei.mi->space_weight(), 0), Weights[Space]);
+      int spaceCount = s * ei.mi->space_weight();
+	  
+	  Value spaceValue = (Value)(spaceCount * (int)mg_value(Weights[Space])) / 0x100;
+
+	  if(spaceCount > 0)       // Positive values gives margin to black
+		  margins[BLACK] += spaceValue;
+	  else if (spaceCount < 0) // Negative values gives margin to white
+		  margins[WHITE] -= spaceValue;
+
+	  score += make_score(spaceValue, spaceValue);
   }
 
   // Scale winning side if position is more drawish that what it appears
@@ -471,6 +536,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
       Score w = make_score(ei.mi->space_weight() * evaluate_space<WHITE>(pos, ei), 0);
       Score b = make_score(ei.mi->space_weight() * evaluate_space<BLACK>(pos, ei), 0);
       trace_add(SPACE, apply_weight(w, Weights[Space]), apply_weight(b, Weights[Space]));
+	  trace_add(SQRCONT, evaluate_square_control(pos, ei));
       trace_add(TOTAL, score);
       TraceStream << "\nUncertainty margin: White: " << to_cp(margins[WHITE])
                   << ", Black: " << to_cp(margins[BLACK])
@@ -483,7 +549,6 @@ Value do_evaluate(const Position& pos, Value& margin) {
 
   return pos.side_to_move() == WHITE ? v : -v;
 }
-
 
   // init_eval_info() initializes king bitboards for given color adding
   // pawn attacks. To be done at the beginning of the evaluation.
@@ -508,6 +573,53 @@ Value do_evaluate(const Position& pos, Value& margin) {
         ei.kingRing[Them] = ei.kingAttackersCount[Us] = 0;
   }
 
+  /// init_all_control() configures controlledBy information
+  void init_all_control(const Position& pos, EvalInfo& ei) {
+
+	  Bitboard wBasicControl = basic_control_of_color<WHITE>(pos, ei);
+	  Bitboard bBasicControl = basic_control_of_color<BLACK>(pos, ei);
+
+	  Bitboard wAllControl   = wBasicControl | (pos.pieces(WHITE) & ~bBasicControl);
+	  Bitboard bAllControl   = bBasicControl | (pos.pieces(BLACK) & ~wBasicControl);
+
+	  // Borrowed from Tord's space module
+	  // Find all squares which are at most three squares behind some friendly pawn
+	  Bitboard behindWhite = pos.pieces(WHITE, PAWN);
+	  behindWhite |= behindWhite >>  8;
+	  behindWhite |= behindWhite >> 16;
+	  Bitboard behindBlack = pos.pieces(BLACK, PAWN);
+	  behindBlack |= behindBlack <<  8;
+	  behindBlack |= behindBlack << 16;
+
+	  ei.controlledBy[WHITE] = wAllControl | (behindWhite & ~ei.attackedBy[BLACK][0]);
+	  ei.controlledBy[BLACK] = bAllControl | (behindBlack & ~ei.attackedBy[WHITE][0]);
+  }
+
+  /// basic_control_of_color gives a bitboard of basic attack control of squares of color
+  template<Color Us>
+  Bitboard basic_control_of_color(const Position& pos, EvalInfo& ei) {
+
+	  const Color Them = (Us == WHITE ? BLACK : WHITE);
+
+	  Bitboard smaller;
+	  Bitboard control;
+
+	  smaller = ei.attackedBy[Them][PAWN];
+	  control = ei.attackedBy[Us][PAWN] & ~smaller;
+
+	  smaller |= ei.attackedBy[Them][KNIGHT];
+	  smaller |= ei.attackedBy[Them][BISHOP];
+	  control |= (ei.attackedBy[Us][KNIGHT] & ~smaller);
+	  control |= (ei.attackedBy[Us][BISHOP] & ~smaller);
+
+	  smaller |= ei.attackedBy[Them][ROOK];
+	  control |= (ei.attackedBy[Us][ROOK] & ~smaller);
+
+	  smaller |= ei.attackedBy[Them][QUEEN];
+	  control |= (ei.attackedBy[Us][QUEEN] & ~smaller);
+
+	  return control;
+  }
 
   // evaluate_outposts() evaluates bishop and knight outposts squares
 
@@ -532,6 +644,19 @@ Value do_evaluate(const Position& pos, Value& margin) {
             bonus += bonus / 2;
     }
     return make_score(bonus, bonus);
+  }
+
+  /// evaluate_square_control() gives bonuses based off square control
+  /// must be computed after pieces for attack data.
+
+  Score evaluate_square_control(const Position& pos, EvalInfo& ei) {
+
+	  int whiteInner = popcount<Max15>(ei.controlledBy[WHITE] & MainCenter);
+	  int blackInner = popcount<Max15>(ei.controlledBy[BLACK] & MainCenter);
+
+	  Score mainBonus = MainCenterBonus  * (whiteInner - blackInner);
+
+	return mainBonus;// + supeBonus;
   }
 
 
@@ -693,7 +818,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
     // Undefended minors get penalized even if not under attack
     undefendedMinors =  pos.pieces(Them)
                       & (pos.pieces(BISHOP) | pos.pieces(KNIGHT))
-                      & ~ei.attackedBy[Them][ALL_PIECES];
+                      & ~ei.attackedBy[Them][0];
 
     if (undefendedMinors)
         score += UndefendedMinorPenalty;
@@ -701,7 +826,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
     // Enemy pieces not defended by a pawn and under our attack
     weakEnemies =  pos.pieces(Them)
                  & ~ei.attackedBy[Them][PAWN]
-                 & ei.attackedBy[Us][ALL_PIECES];
+                 & ei.attackedBy[Us][0];
 
     if (!weakEnemies)
         return score;
@@ -740,9 +865,9 @@ Value do_evaluate(const Position& pos, Value& margin) {
     score += evaluate_pieces<QUEEN,  Us, Trace>(pos, ei, mobility, mobilityArea);
 
     // Sum up all attacked squares
-    ei.attackedBy[Us][ALL_PIECES] =   ei.attackedBy[Us][PAWN]   | ei.attackedBy[Us][KNIGHT]
-                                    | ei.attackedBy[Us][BISHOP] | ei.attackedBy[Us][ROOK]
-                                    | ei.attackedBy[Us][QUEEN]  | ei.attackedBy[Us][KING];
+    ei.attackedBy[Us][0] =   ei.attackedBy[Us][PAWN]   | ei.attackedBy[Us][KNIGHT]
+                           | ei.attackedBy[Us][BISHOP] | ei.attackedBy[Us][ROOK]
+                           | ei.attackedBy[Us][QUEEN]  | ei.attackedBy[Us][KING];
     return score;
   }
 
@@ -768,7 +893,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
     {
         // Find the attacked squares around the king which has no defenders
         // apart from the king itself
-        undefended = ei.attackedBy[Them][ALL_PIECES] & ei.attackedBy[Us][KING];
+        undefended = ei.attackedBy[Them][0] & ei.attackedBy[Us][KING];
         undefended &= ~(  ei.attackedBy[Us][PAWN]   | ei.attackedBy[Us][KNIGHT]
                         | ei.attackedBy[Us][BISHOP] | ei.attackedBy[Us][ROOK]
                         | ei.attackedBy[Us][QUEEN]);
@@ -816,7 +941,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
         }
 
         // Analyse enemy's safe distance checks for sliders and knights
-        safe = ~(pos.pieces(Them) | ei.attackedBy[Us][ALL_PIECES]);
+        safe = ~(pos.pieces(Them) | ei.attackedBy[Us][0]);
 
         b1 = pos.attacks_from<ROOK>(ksq) & safe;
         b2 = pos.attacks_from<BISHOP>(ksq) & safe;
@@ -852,6 +977,10 @@ Value do_evaluate(const Position& pos, Value& margin) {
         score -= KingDangerTable[Us == Search::RootColor][attackUnits];
         margins[Us] += mg_value(KingDangerTable[Us == Search::RootColor][attackUnits]);
     }
+
+	int centerDist = std::min(std::min(square_distance(ksq, SQ_D4), square_distance(ksq, SQ_D5)),
+		std::min(square_distance(ksq, SQ_E4), square_distance(ksq, SQ_E5)));
+	score -= KingDistanceDeduction * (centerDist * centerDist);
 
     if (Trace)
         TracedScores[Us][KING] = score;
@@ -903,7 +1032,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
             if (pos.is_empty(blockSq))
             {
                 squaresToQueen = forward_bb(Us, s);
-                defendedSquares = squaresToQueen & ei.attackedBy[Us][ALL_PIECES];
+                defendedSquares = squaresToQueen & ei.attackedBy[Us][0];
 
                 // If there is an enemy rook or queen attacking the pawn from behind,
                 // add all X-ray attacks by the rook or queen. Otherwise consider only
@@ -912,7 +1041,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
                     && (forward_bb(Them, s) & pos.pieces(Them, ROOK, QUEEN) & pos.attacks_from<ROOK>(s)))
                     unsafeSquares = squaresToQueen;
                 else
-                    unsafeSquares = squaresToQueen & (ei.attackedBy[Them][ALL_PIECES] | pos.pieces(Them));
+					unsafeSquares = squaresToQueen & ei.controlledBy[Them];
 
                 // If there aren't enemy attacks or pieces along the path to queen give
                 // huge bonus. Even bigger if we protect the pawn's path.
@@ -923,7 +1052,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
                     // squares which are attacked by the enemy also attacked by us ?
                     // If yes, big bonus (but smaller than when there are no enemy attacks),
                     // if no, somewhat smaller bonus.
-                    ebonus += Value(rr * ((unsafeSquares & defendedSquares) == unsafeSquares ? 13 : 8));
+                    ebonus += Value(rr * 3);
             }
         } // rr != 0
 
@@ -989,7 +1118,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
             // Compute plies to queening and check direct advancement
             movesToGo = rank_distance(s, queeningSquare) - int(relative_rank(c, s) == RANK_2);
             oppMovesToGo = square_distance(pos.king_square(~c), queeningSquare) - int(c != pos.side_to_move());
-            pathDefended = ((ei.attackedBy[c][ALL_PIECES] & queeningPath) == queeningPath);
+            pathDefended = ((ei.attackedBy[c][0] & queeningPath) == queeningPath);
 
             if (movesToGo >= oppMovesToGo && !pathDefended)
                 continue;
@@ -1130,24 +1259,9 @@ Value do_evaluate(const Position& pos, Value& margin) {
 
     const Color Them = (Us == WHITE ? BLACK : WHITE);
 
-    // Find the safe squares for our pieces inside the area defined by
-    // SpaceMask[]. A square is unsafe if it is attacked by an enemy
-    // pawn, or if it is undefended and attacked by an enemy piece.
-    Bitboard safe =   SpaceMask[Us]
-                   & ~pos.pieces(Us, PAWN)
-                   & ~ei.attackedBy[Them][PAWN]
-                   & (ei.attackedBy[Us][ALL_PIECES] | ~ei.attackedBy[Them][ALL_PIECES]);
+	Bitboard space = ~ei.controlledBy[Them] & SpaceMask[Us];
 
-    // Find all squares which are at most three squares behind some friendly pawn
-    Bitboard behind = pos.pieces(Us, PAWN);
-    behind |= (Us == WHITE ? behind >>  8 : behind <<  8);
-    behind |= (Us == WHITE ? behind >> 16 : behind << 16);
-
-    // Since SpaceMask[Us] is fully on our half of the board
-    assert(unsigned(safe >> (Us == WHITE ? 32 : 0)) == 0);
-
-    // Count safe + (behind & safe) with a single popcount
-    return popcount<Full>((Us == WHITE ? safe << 32 : safe >> 32) | (behind & safe));
+    return popcount<Full>(space);
   }
 
 
@@ -1200,7 +1314,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
     Score bScore = TracedScores[BLACK][idx];
 
     switch (idx) {
-    case PST: case IMBALANCE: case PAWN: case UNSTOPPABLE: case TOTAL:
+	case PST: case SQRCONT: case IMBALANCE: case PAWN: case UNSTOPPABLE: case TOTAL:
         TraceStream << std::setw(20) << name << " |   ---   --- |   ---   --- | "
                     << std::setw(6)  << to_cp(mg_value(wScore)) << " "
                     << std::setw(6)  << to_cp(eg_value(wScore)) << " \n";
