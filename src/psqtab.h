@@ -21,15 +21,16 @@
 #define PSQTAB_H_INCLUDED
 
 #include "types.h"
+#include "ucioption.h"
 
 #define S(mg, eg) make_score(mg, eg)
 
 
-/// PSQT[PieceType][Square] contains Piece-Square scores. For each piece type on
+/// PSQTraw[PieceType][Square] contains Piece-Square scores. For each piece type on
 /// a given square a (midgame, endgame) score pair is assigned. PSQT is defined
 /// for white side, for black side the tables are symmetric.
 
-static const Score PSQT[][SQUARE_NB] = {
+static const Score PSQTraw[][SQUARE_NB] = {
   { },
   { // Pawn
    S(  0, 0), S( 0, 0), S( 0, 0), S( 0, 0), S(0,  0), S( 0, 0), S( 0, 0), S(  0, 0),
@@ -94,5 +95,19 @@ static const Score PSQT[][SQUARE_NB] = {
 };
 
 #undef S
+
+static Score PSQT[PIECE_NB][SQUARE_NB];
+
+namespace PSQ {
+	static void init();
+
+	static void PSQ::init() {
+
+		int mod = Options["Piece-Square Table Influence"];
+		for(int i = 0; i < PIECE_NB; i++)
+			for(int s = 0; s < SQUARE_NB; s++)
+				PSQT[i][s] = (PSQTraw[i][s] * mod) / 100;
+	}
+}
 
 #endif // !defined(PSQTAB_H_INCLUDED)

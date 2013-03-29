@@ -27,6 +27,7 @@
 #include "thread.h"
 #include "tt.h"
 #include "ucioption.h"
+#include "psqtab.h"
 
 int main(int argc, char* argv[]) {
 
@@ -34,6 +35,7 @@ int main(int argc, char* argv[]) {
 
   UCI::init(Options);
   Bitboards::init();
+  PSQ::init();
   Zobrist::init();
   Bitbases::init_kpk();
   Search::init();
