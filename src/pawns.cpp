@@ -29,21 +29,6 @@ namespace {
   #define V Value
   #define S(mg, eg) make_score(mg, eg)
 
-  #define SEE_MIRROR S(0, 0), S(0, 0), S(0, 0), S(0, 0),
-  // Pawn position scoring
-  const Score PawnPosition[SQUARE_NB] = {
-	  //   a-h        b-g        c-f        d-e
-	  S(  0,  0), S( 0,  0), S( 0,  0), S(0,    0), SEE_MIRROR // 1
-	  S(-10, 20), S(-5,  5), S( 5, -5), S(10, -10), SEE_MIRROR // 2
-	  S(-10, 20), S(-5,  5), S( 5, -5), S(15, -10), SEE_MIRROR // 3
-	  S(-10, 25), S(-5, 10), S(10,  0), S(20,  -5), SEE_MIRROR // 4
-	  S( -3, 33), S( 3, 17), S(17,  7), S(27,   0), SEE_MIRROR // 5
-	  S(  6, 45), S(12, 29), S(25, 16), S(40,   5), SEE_MIRROR // 6
-	  S(  0,  0), S(0,   0), S( 0,  0), S( 0,   0), SEE_MIRROR // 7
-	  S(  0,  0), S(0,   0), S( 0,  0), S( 0,   0), SEE_MIRROR // 8
-  };
-  #undef FLIP_REF
-
   // Doubled pawn penalty by opposed flag and file
   const Score DoubledPawnPenalty[2][FILE_NB] = {
   { S(13, 43), S(20, 48), S(23, 48), S(23, 48),
@@ -167,12 +152,6 @@ namespace {
         candidate =   !(opposed | passed | backward | isolated)
                    && (b = attack_span_mask(Them, s + pawn_push(Us)) & ourPawns) != 0
                    &&  popcount<Max15>(b) >= popcount<Max15>(attack_span_mask(Us, s) & theirPawns);
-
-		if (!passed) {
-			// Based off of pawn position
-			Square relative = f <= FILE_D ? relative_square(Us, s) : mirror(relative_square(Us, s));
-			value += PawnPosition[relative];
-		}
 
         // Passed pawns will be properly scored in evaluation because we need
         // full attack info to evaluate passed pawns. Only the frontmost passed
