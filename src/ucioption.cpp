@@ -39,7 +39,7 @@ namespace UCI {
 void on_logger(const Option& o) { start_logger(o); }
 void on_eval(const Option&) {
 	Eval::init();
-	PSQ::init();
+	Zobrist::initPSQ();
 }
 void on_threads(const Option&) { Threads.read_uci_options(); }
 void on_hash_size(const Option& o) { TT.set_size(o); }
@@ -79,6 +79,8 @@ void init(OptionsMap& o) {
   o["Closed Mobility (Middle Game)"]  = Option(100, 0, 200, on_eval);
   o["Closed Mobility (Endgame)"]      = Option(100, 0, 200, on_eval);
   */
+  o["King Centalization"]             = Option(8,   0, 20,  on_eval);
+  o["Center Control (MG)"]            = Option(17,  0, 100, on_eval);
   o["Passed Pawns (Middle Game)"]     = Option(100, 0, 200, on_eval);
   o["Passed Pawns (Endgame)"]         = Option(100, 0, 200, on_eval);
   o["Space"]                          = Option(100, 0, 200, on_eval);

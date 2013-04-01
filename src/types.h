@@ -342,6 +342,7 @@ namespace Zobrist {
   extern Key exclusion;
 
   void init();
+  void initPSQ();
 }
 
 CACHE_LINE_ALIGNMENT

@@ -147,10 +147,10 @@ namespace {
     { S(0, 0), S(15, 39), S(15, 39), S(15, 39), S(15, 39), S( 0,  0) }  // QUEEN
   };
 
-  const Score MainCenterBonus  = S(41, 0);
-  const Score SuperCenterBonus = S( 8, 0);
+  Score MainCenterBonus  = S(17, 0);
+  Score SuperCenterBonus = S( 8, 0);
 
-  const Score KingDistanceDeduction = S(0, 8);
+  Score KingDistanceDeduction = S(0, 8);
 
   // ThreatenedByPawnPenalty[PieceType] contains a penalty according to which
   // piece type is attacked by an enemy pawn.
@@ -160,7 +160,7 @@ namespace {
 
   #undef S
 
-  const Score BishopPinBonus = make_score(121, 11);
+  const Score BishopPinBonus = make_score(78, 11);
 
   // Bonus for having the side to move (modified by Joona Kiiski)
   const Score Tempo = make_score(24, 12);
@@ -357,6 +357,9 @@ namespace Eval {
         KingDangerTable[0][i] = apply_weight(make_score(t, 0), make_score(KingDanger[0], 0));
         KingDangerTable[1][i] = apply_weight(make_score(t, 0), make_score(KingDanger[1], 0));
     }
+
+	KingDistanceDeduction = make_score(0, Options["King Centalization"]);
+	MainCenterBonus       = make_score(Options["Center Control (MG)"], 0);
   }
 
 

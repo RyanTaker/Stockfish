@@ -85,19 +85,31 @@ void init() {
   side = rk.rand<Key>();
   exclusion  = rk.rand<Key>();
 
-  for (PieceType pt = PAWN; pt <= KING; pt++)
-  {
-      PieceValue[MG][make_piece(BLACK, pt)] = PieceValue[MG][pt];
-      PieceValue[EG][make_piece(BLACK, pt)] = PieceValue[EG][pt];
+  initPSQ();
+}
 
-      Score v = make_score(PieceValue[MG][pt], PieceValue[EG][pt]);
+void initPSQ() {
+	for (PieceType pt = PAWN; pt <= KING; pt++)
+	{
+		PieceValue[MG][make_piece(BLACK, pt)] = PieceValue[MG][pt];
+		PieceValue[EG][make_piece(BLACK, pt)] = PieceValue[EG][pt];
 
-      for (Square s = SQ_A1; s <= SQ_H8; s++)
-      {
-          pieceSquareTable[make_piece(WHITE, pt)][ s] =  (v + PSQT[pt][s]);
-          pieceSquareTable[make_piece(BLACK, pt)][~s] = -(v + PSQT[pt][s]);
-      }
-  }
+		Score v = make_score(PieceValue[MG][pt], PieceValue[EG][pt]);
+
+		int mod = Options["Piece-Square Table Influence"];
+
+		for (Square s = SQ_A1; s <= SQ_H8; s++)
+		{
+			Score psq = make_score(mg_value(PSQT[pt][s]) * mod / 100,
+								   eg_value(PSQT[pt][s]) * mod / 100);
+
+			Score white =   v + psq;
+			Score black = -(v + psq);
+
+			pieceSquareTable[make_piece(WHITE, pt)][ s] = white;
+			pieceSquareTable[make_piece(BLACK, pt)][~s] = black;
+		}
+	}
 }
 
 } // namespace Zobrist
