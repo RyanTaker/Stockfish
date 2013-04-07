@@ -24,6 +24,23 @@
 
 #define S(mg, eg) make_score(mg, eg)
 
+// Generic Constants
+static const Score ZERO = S(0, 0);
+
+// Pawn Constants
+static const int Pawn_Eg      =  -8;
+static const int Pawn_File_AH = -28;
+static const int Pawn_File_BG =  -6;
+
+// Rook Constants
+static const int Rook_Eg        =   3;
+static const int Rook_File_AH   = -12;
+static const int Rook_File_BG   =  -7;
+static const int Rook_File_CF   =  -2;
+static const int Rook_File_DE   =   2;
+
+// Queen Constants
+static const int Queen_Mg = 8;
 
 /// PSQT[PieceType][Square] contains Piece-Square scores. For each piece type on
 /// a given square a (midgame, endgame) score pair is assigned. PSQT is defined
@@ -32,14 +49,14 @@
 static const Score PSQT[][SQUARE_NB] = {
   { },
   { // Pawn
-   S(  0, 0), S( 0, 0), S( 0, 0), S( 0, 0), S(0,  0), S( 0, 0), S( 0, 0), S(  0, 0),
+      ZERO,      ZERO,    ZERO,     ZERO,     ZERO,     ZERO,     ZERO,      ZERO,
    S(-28,-8), S(-6,-8), S( 4,-8), S(14,-8), S(14,-8), S( 4,-8), S(-6,-8), S(-28,-8),
    S(-28,-8), S(-6,-8), S( 9,-8), S(36,-8), S(36,-8), S( 9,-8), S(-6,-8), S(-28,-8),
    S(-28,-8), S(-6,-8), S(17,-8), S(58,-8), S(58,-8), S(17,-8), S(-6,-8), S(-28,-8),
    S(-28,-8), S(-6,-8), S(17,-8), S(36,-8), S(36,-8), S(17,-8), S(-6,-8), S(-28,-8),
    S(-28,-8), S(-6,-8), S( 9,-8), S(14,-8), S(14,-8), S( 9,-8), S(-6,-8), S(-28,-8),
    S(-28,-8), S(-6,-8), S( 4,-8), S(14,-8), S(14,-8), S( 4,-8), S(-6,-8), S(-28,-8),
-   S(  0, 0), S( 0, 0), S( 0, 0), S( 0, 0), S(0,  0), S( 0, 0), S( 0, 0), S(  0, 0)
+      ZERO,      ZERO,    ZERO,     ZERO,     ZERO,     ZERO,     ZERO,      ZERO
   },
   { // Knight
    S(-135,-104), S(-107,-79), S(-80,-55), S(-67,-42), S(-67,-42), S(-80,-55), S(-107,-79), S(-135,-104),
@@ -62,14 +79,22 @@ static const Score PSQT[][SQUARE_NB] = {
    S(-17,-59), S(-17,-42), S(-13,-35), S( -8,-26), S( -8,-26), S(-13,-35), S(-17,-42), S(-17,-59)
   },
   { // Rook
-   S(-12, 3), S(-7, 3), S(-2, 3), S(2, 3), S(2, 3), S(-2, 3), S(-7, 3), S(-12, 3),
-   S(-12, 3), S(-7, 3), S(-2, 3), S(2, 3), S(2, 3), S(-2, 3), S(-7, 3), S(-12, 3),
-   S(-12, 3), S(-7, 3), S(-2, 3), S(2, 3), S(2, 3), S(-2, 3), S(-7, 3), S(-12, 3),
-   S(-12, 3), S(-7, 3), S(-2, 3), S(2, 3), S(2, 3), S(-2, 3), S(-7, 3), S(-12, 3),
-   S(-12, 3), S(-7, 3), S(-2, 3), S(2, 3), S(2, 3), S(-2, 3), S(-7, 3), S(-12, 3),
-   S(-12, 3), S(-7, 3), S(-2, 3), S(2, 3), S(2, 3), S(-2, 3), S(-7, 3), S(-12, 3),
-   S(-12, 3), S(-7, 3), S(-2, 3), S(2, 3), S(2, 3), S(-2, 3), S(-7, 3), S(-12, 3),
-   S(-12, 3), S(-7, 3), S(-2, 3), S(2, 3), S(2, 3), S(-2, 3), S(-7, 3), S(-12, 3)
+   S(Rook_File_AH, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_DE, Rook_Eg),
+		S(Rook_File_DE, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_AH, Rook_Eg),
+   S(Rook_File_AH, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_DE, Rook_Eg),
+		S(Rook_File_DE, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_AH, Rook_Eg),
+   S(Rook_File_AH, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_DE, Rook_Eg),
+		S(Rook_File_DE, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_AH, Rook_Eg),
+   S(Rook_File_AH, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_DE, Rook_Eg),
+		S(Rook_File_DE, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_AH, Rook_Eg),
+   S(Rook_File_AH, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_DE, Rook_Eg),
+		S(Rook_File_DE, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_AH, Rook_Eg),
+   S(Rook_File_AH, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_DE, Rook_Eg),
+		S(Rook_File_DE, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_AH, Rook_Eg),
+   S(Rook_File_AH, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_DE, Rook_Eg),
+		S(Rook_File_DE, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_AH, Rook_Eg),
+   S(Rook_File_AH, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_DE, Rook_Eg),
+		S(Rook_File_DE, Rook_Eg), S(Rook_File_CF, Rook_Eg), S(Rook_File_BG, Rook_Eg), S(Rook_File_AH, Rook_Eg)
   },
   { // Queen
    S(8,-80), S(8,-54), S(8,-42), S(8,-30), S(8,-30), S(8,-42), S(8,-54), S(8,-80),
