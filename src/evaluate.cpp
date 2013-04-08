@@ -1037,7 +1037,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
                     && (forward_bb(Them, s) & pos.pieces(Them, ROOK, QUEEN) & pos.attacks_from<ROOK>(s)))
                     unsafeSquares = squaresToQueen;
                 else
-					unsafeSquares = squaresToQueen & ei.controlledBy[Them];
+                    unsafeSquares = squaresToQueen & (ei.attackedBy[Them][ALL_PIECES] | pos.pieces(Them));
 
                 // If there aren't enemy attacks or pieces along the path to queen give
                 // huge bonus. Even bigger if we protect the pawn's path.
@@ -1048,7 +1048,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
                     // squares which are attacked by the enemy also attacked by us ?
                     // If yes, big bonus (but smaller than when there are no enemy attacks),
                     // if no, somewhat smaller bonus.
-                    ebonus += Value(rr * 3);
+                    ebonus += Value(rr * ((unsafeSquares & defendedSquares) == unsafeSquares ? 13 : 8));
             }
         } // rr != 0
 
