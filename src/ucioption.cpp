@@ -102,6 +102,46 @@ void init(OptionsMap& o) {
   o["Slow Mover"]                     = Option(100, 10, 1000);
   o["UCI_Chess960"]                   = Option(false);
   o["UCI_AnalyseMode"]                = Option(false, on_eval);
+  o["Use Debug Log"]               = Option(false, on_logger);
+  o["Use Search Log"]              = Option(false);
+  o["Search Log Filename"]         = Option("SearchLog.txt");
+  o["Book File"]                   = Option("book.bin");
+  o["Best Book Move"]              = Option(false);
+  o["Contempt Factor"]             = Option(0, -50,  50);
+  ///*
+  o["Mobility (Middle Game)"]      = Option(100, 0, 200, on_eval);
+  o["Mobility (Endgame)"]          = Option(100, 0, 200, on_eval);
+  //*/
+  /*
+  o["Open Mobility (Middle Game)"]    = Option(100, 0, 200, on_eval);
+  o["Open Mobility (Endgame)"]        = Option(100, 0, 200, on_eval);
+  o["Closed Mobility (Middle Game)"]  = Option(100, 0, 200, on_eval);
+  o["Closed Mobility (Endgame)"]      = Option(100, 0, 200, on_eval);
+  */
+  o["King Centalization"]          = Option(8,   0, 20,  on_eval);
+  o["Center Control (MG)"]         = Option(17,  0, 100, on_eval);
+  o["Passed Pawns (Middle Game)"]  = Option(100, 0, 200, on_eval);
+  o["Passed Pawns (Endgame)"]      = Option(100, 0, 200, on_eval);
+  o["Space"]                       = Option(100, 0, 200, on_eval);
+  o["Aggressiveness"]              = Option(100, 0, 200, on_eval);
+  o["Cowardice"]                   = Option(100, 0, 200, on_eval);
+  o["Min Split Depth"]             = Option(msd, 4, 12, on_threads);
+  o["Max Threads per Split Point"] = Option(5, 4, 8, on_threads);
+  o["Threads"]                     = Option(cpus, 1, MAX_THREADS, on_threads);
+  o["Use Sleeping Threads"]        = Option(true);
+  o["Hash"]                        = Option(32, 1, 8192, on_hash_size);
+  o["Clear Hash"]                  = Option(on_clear_hash);
+  o["Ponder"]                      = Option(true);
+  o["OwnBook"]                     = Option(false);
+  o["MultiPV"]                     = Option(1, 1, 500);
+  o["Skill Level"]                 = Option(20, 0, 20);
+  o["Emergency Move Horizon"]      = Option(40, 0, 50);
+  o["Emergency Base Time"]         = Option(200, 0, 30000);
+  o["Emergency Move Time"]         = Option(70, 0, 5000);
+  o["Minimum Thinking Time"]       = Option(20, 0, 5000);
+  o["Slow Mover"]                  = Option(100, 10, 1000);
+  o["UCI_Chess960"]                = Option(false);
+  o["UCI_AnalyseMode"]             = Option(false, on_eval);
 }
 
 
