@@ -41,7 +41,7 @@ namespace {
     Pawns::Entry* pi;
 
     // attackedBy[color][piece type] is a bitboard representing all squares
-    // attacked by a given color and piece type, attackedBy[color][0] contains
+    // attacked by a given color and piece type, attackedBy[color][ALL_PIECES] contains
     // all squares attacked by the given color.
     Bitboard attackedBy[COLOR_NB][PIECE_TYPE_NB];
 
@@ -586,8 +586,8 @@ Value do_evaluate(const Position& pos, Value& margin) {
 	  behindBlack |= behindBlack <<  8;
 	  behindBlack |= behindBlack << 16;
 
-	  ei.controlledBy[WHITE] = wAllControl | (behindWhite & ~ei.attackedBy[BLACK][0]);
-	  ei.controlledBy[BLACK] = bAllControl | (behindBlack & ~ei.attackedBy[WHITE][0]);
+	  ei.controlledBy[WHITE] = wAllControl | (behindWhite & ~ei.attackedBy[BLACK][ALL_PIECES]);
+	  ei.controlledBy[BLACK] = bAllControl | (behindBlack & ~ei.attackedBy[WHITE][ALL_PIECES]);
   }
 
   /// basic_control_of_color gives a bitboard of basic attack control of squares of color
@@ -813,7 +813,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
     // Undefended minors get penalized even if not under attack
     undefendedMinors =  pos.pieces(Them)
                       & (pos.pieces(BISHOP) | pos.pieces(KNIGHT))
-                      & ~ei.attackedBy[Them][0];
+                      & ~ei.attackedBy[Them][ALL_PIECES];
 
     if (undefendedMinors)
         score += UndefendedMinorPenalty;
@@ -821,7 +821,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
     // Enemy pieces not defended by a pawn and under our attack
     weakEnemies =  pos.pieces(Them)
                  & ~ei.attackedBy[Them][PAWN]
-                 & ei.attackedBy[Us][0];
+                 & ei.attackedBy[Us][ALL_PIECES];
 
     if (!weakEnemies)
         return score;
@@ -860,7 +860,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
     score += evaluate_pieces<QUEEN,  Us, Trace>(pos, ei, mobility, mobilityArea);
 
     // Sum up all attacked squares
-    ei.attackedBy[Us][0] =   ei.attackedBy[Us][PAWN]   | ei.attackedBy[Us][KNIGHT]
+    ei.attackedBy[Us][ALL_PIECES] =   ei.attackedBy[Us][PAWN]   | ei.attackedBy[Us][KNIGHT]
                            | ei.attackedBy[Us][BISHOP] | ei.attackedBy[Us][ROOK]
                            | ei.attackedBy[Us][QUEEN]  | ei.attackedBy[Us][KING];
     return score;
@@ -888,7 +888,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
     {
         // Find the attacked squares around the king which has no defenders
         // apart from the king itself
-        undefended = ei.attackedBy[Them][0] & ei.attackedBy[Us][KING];
+        undefended = ei.attackedBy[Them][ALL_PIECES] & ei.attackedBy[Us][KING];
         undefended &= ~(  ei.attackedBy[Us][PAWN]   | ei.attackedBy[Us][KNIGHT]
                         | ei.attackedBy[Us][BISHOP] | ei.attackedBy[Us][ROOK]
                         | ei.attackedBy[Us][QUEEN]);
@@ -936,7 +936,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
         }
 
         // Analyse enemy's safe distance checks for sliders and knights
-        safe = ~(pos.pieces(Them) | ei.attackedBy[Us][0]);
+        safe = ~(pos.pieces(Them) | ei.attackedBy[Us][ALL_PIECES]);
 
         b1 = pos.attacks_from<ROOK>(ksq) & safe;
         b2 = pos.attacks_from<BISHOP>(ksq) & safe;
@@ -1027,7 +1027,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
             if (pos.is_empty(blockSq))
             {
                 squaresToQueen = forward_bb(Us, s);
-                defendedSquares = squaresToQueen & ei.attackedBy[Us][0];
+                defendedSquares = squaresToQueen & ei.attackedBy[Us][ALL_PIECES];
 
                 // If there is an enemy rook or queen attacking the pawn from behind,
                 // add all X-ray attacks by the rook or queen. Otherwise consider only
@@ -1113,7 +1113,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
             // Compute plies to queening and check direct advancement
             movesToGo = rank_distance(s, queeningSquare) - int(relative_rank(c, s) == RANK_2);
             oppMovesToGo = square_distance(pos.king_square(~c), queeningSquare) - int(c != pos.side_to_move());
-            pathDefended = ((ei.attackedBy[c][0] & queeningPath) == queeningPath);
+            pathDefended = ((ei.attackedBy[c][ALL_PIECES] & queeningPath) == queeningPath);
 
             if (movesToGo >= oppMovesToGo && !pathDefended)
                 continue;
