@@ -218,14 +218,14 @@ namespace {
 	(1ULL << SQ_E5) | (1ULL << SQ_F5) | (1ULL << SQ_G5) | (1ULL << SQ_H5);
 
   const Bitboard BoardEdge =
-	  (1ULL << SQ_A8) | (1ULL << SQ_B8) | (1ULL << SQ_C8) | (1ULL << SQ_D8) | (1ULL << SQ_E8) | (1ULL << SQ_F8) | (1ULL << SQ_G8) | (1ULL << SQ_H8) |
-	  (1ULL << SQ_A7)                                                       |                                                       (1ULL << SQ_H7) |
-	  (1ULL << SQ_A6)                                                       |                                                       (1ULL << SQ_H6) |
-	  (1ULL << SQ_A5)                                                       |                                                       (1ULL << SQ_H5) |
-      (1ULL << SQ_A4)                                                       |                                                       (1ULL << SQ_H4) |
-      (1ULL << SQ_A3)                                                       |                                                       (1ULL << SQ_H3) |
-      (1ULL << SQ_A2)                                                       |                                                       (1ULL << SQ_H2) |
-      (1ULL << SQ_A1) | (1ULL << SQ_B1) | (1ULL << SQ_C1) | (1ULL << SQ_D1) | (1ULL << SQ_E1) | (1ULL << SQ_F1) | (1ULL << SQ_G1) | (1ULL << SQ_H1);
+	(1ULL << SQ_A8) | (1ULL << SQ_B8) | (1ULL << SQ_C8) | (1ULL << SQ_D8) | (1ULL << SQ_E8) | (1ULL << SQ_F8) | (1ULL << SQ_G8) | (1ULL << SQ_H8) |
+	(1ULL << SQ_A7)                                                       |                                                       (1ULL << SQ_H7) |
+	(1ULL << SQ_A6)                                                       |                                                       (1ULL << SQ_H6) |
+	(1ULL << SQ_A5)                                                       |                                                       (1ULL << SQ_H5) |
+	(1ULL << SQ_A4)                                                       |                                                       (1ULL << SQ_H4) |
+	(1ULL << SQ_A3)                                                       |                                                       (1ULL << SQ_H3) |
+	(1ULL << SQ_A2)                                                       |                                                       (1ULL << SQ_H2) |
+	(1ULL << SQ_A1) | (1ULL << SQ_B1) | (1ULL << SQ_C1) | (1ULL << SQ_D1) | (1ULL << SQ_E1) | (1ULL << SQ_F1) | (1ULL << SQ_G1) | (1ULL << SQ_H1);
 
   const Bitboard EnemyKingside [COLOR_NB] = { BlackKingside,  WhiteKingside };
   const Bitboard EnemyQueenside[COLOR_NB] = { BlackQueenside, WhiteQueenside };
