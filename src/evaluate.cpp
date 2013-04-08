@@ -41,8 +41,8 @@ namespace {
     Pawns::Entry* pi;
 
     // attackedBy[color][piece type] is a bitboard representing all squares
-    // attacked by a given color and piece type, attackedBy[color][ALL_PIECES] contains
-    // all squares attacked by the given color.
+    // attacked by a given color and piece type, attackedBy[color][ALL_PIECES]
+	// contains all squares attacked by the given color.
     Bitboard attackedBy[COLOR_NB][PIECE_TYPE_NB];
 
 	// controlledBy[color] is a board representing the squares controled by
@@ -379,7 +379,7 @@ namespace Eval {
                 <<             "                     |   MG    EG  |   MG    EG  |   MG     EG   \n"
                 <<             "---------------------+-------------+-------------+---------------\n";
 
-    trace_row("Material, Tempo", PST);
+    trace_row("Material, PST, Tempo", PST);
 	trace_row("Square Control", SQRCONT);
     trace_row("Material imbalance", IMBALANCE);
     trace_row("Pawns", PAWN);
@@ -544,6 +544,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
 
   return pos.side_to_move() == WHITE ? v : -v;
 }
+
 
   // init_eval_info() initializes king bitboards for given color adding
   // pawn attacks. To be done at the beginning of the evaluation.
@@ -861,8 +862,8 @@ Value do_evaluate(const Position& pos, Value& margin) {
 
     // Sum up all attacked squares
     ei.attackedBy[Us][ALL_PIECES] =   ei.attackedBy[Us][PAWN]   | ei.attackedBy[Us][KNIGHT]
-                           | ei.attackedBy[Us][BISHOP] | ei.attackedBy[Us][ROOK]
-                           | ei.attackedBy[Us][QUEEN]  | ei.attackedBy[Us][KING];
+                                   | ei.attackedBy[Us][BISHOP] | ei.attackedBy[Us][ROOK]
+                                   | ei.attackedBy[Us][QUEEN]  | ei.attackedBy[Us][KING];
     return score;
   }
 

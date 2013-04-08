@@ -21,13 +21,11 @@
 #define PSQTAB_H_INCLUDED
 
 #include "types.h"
-#include "ucioption.h"
-#include "misc.h"
 
 #define S(mg, eg) make_score(mg, eg)
 
 
-/// PSQTraw[PieceType][Square] contains Piece-Square scores. For each piece type on
+/// PSQT[PieceType][Square] contains Piece-Square scores. For each piece type on
 /// a given square a (midgame, endgame) score pair is assigned. PSQT is defined
 /// for white side, for black side the tables are symmetric.
 

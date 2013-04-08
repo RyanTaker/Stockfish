@@ -27,7 +27,6 @@
 #include "thread.h"
 #include "tt.h"
 #include "ucioption.h"
-#include "psqtab.h"
 
 int main(int argc, char* argv[]) {
 
