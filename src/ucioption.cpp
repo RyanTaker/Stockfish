@@ -81,6 +81,7 @@ void init(OptionsMap& o) {
   o["Passed Pawns (Middle Game)"]  = Option(100, 0, 200, on_eval);
   o["Passed Pawns (Endgame)"]      = Option(100, 0, 200, on_eval);
   o["Space"]                       = Option(100, 0, 200, on_eval);
+  o["Piece-Square Table Influence"]= Option(100, 0, 200, on_eval);
   o["Aggressiveness"]              = Option(100, 0, 200, on_eval);
   o["Cowardice"]                   = Option(100, 0, 200, on_eval);
   o["Min Split Depth"]             = Option(msd, 4, 12, on_threads);
