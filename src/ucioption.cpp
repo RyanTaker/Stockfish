@@ -39,6 +39,7 @@ void on_logger(const Option& o) { start_logger(o); }
 void on_eval(const Option&) {
 	Eval::init();
 	Zobrist::initPSQ();
+	Pawns::init();
 }
 void on_threads(const Option&) { Threads.read_uci_options(); }
 void on_hash_size(const Option& o) { TT.set_size(o); }
@@ -70,12 +71,6 @@ void init(OptionsMap& o) {
   o["Contempt Factor"]             = Option(0, -50,  50);
   o["Mobility (Middle Game)"]      = Option(100, 0, 200, on_eval);
   o["Mobility (Endgame)"]          = Option(100, 0, 200, on_eval);
-  /*
-  o["Open Mobility (Middle Game)"]    = Option(100, 0, 200, on_eval);
-  o["Open Mobility (Endgame)"]        = Option(100, 0, 200, on_eval);
-  o["Closed Mobility (Middle Game)"]  = Option(100, 0, 200, on_eval);
-  o["Closed Mobility (Endgame)"]      = Option(100, 0, 200, on_eval);
-  */
   o["King Centalization"]          = Option(3,   0, 20,  on_eval);
   o["Center Control (MG)"]         = Option(5 ,  0, 100, on_eval);
   o["Pawn Central Control"]        = Option(100, 0, 200, on_eval);

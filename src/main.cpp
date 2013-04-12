@@ -27,6 +27,7 @@
 #include "thread.h"
 #include "tt.h"
 #include "ucioption.h"
+#include "pawns.h"
 
 int main(int argc, char* argv[]) {
 
@@ -38,6 +39,7 @@ int main(int argc, char* argv[]) {
   Bitbases::init_kpk();
   Search::init();
   Eval::init();
+  Pawns::init();
   Threads.init();
   TT.set_size(Options["Hash"]);
 

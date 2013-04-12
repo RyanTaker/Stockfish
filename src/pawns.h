@@ -69,6 +69,7 @@ typedef HashTable<Entry, 16384> Table;
 
 Entry* probe(const Position& pos, Table& entries);
 
+extern void init();
 }
 
 #endif // !defined(PAWNS_H_INCLUDED)

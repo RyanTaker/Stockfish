@@ -97,6 +97,10 @@ namespace {
   #undef S
   #undef V
 
+  Score WeightedPawnPosition[SQUARE_NB];
+
+
+
   template<Color Us>
   Score evaluate_pawns(const Position& pos, Bitboard ourPawns,
                        Bitboard theirPawns, Pawns::Entry* e) {
@@ -172,7 +176,7 @@ namespace {
 		if (!passed) {
 			// Based off of pawn position
 			Square relative = f <= FILE_D ? relative_square(Us, s) : mirror(relative_square(Us, s));
-			value += (PawnPosition[relative] * Options["Standard Pawn Position"]) / 100;
+			value += WeightedPawnPosition[relative];
 		}
 
         // Passed pawns will be properly scored in evaluation because we need
@@ -203,6 +207,11 @@ namespace {
 }
 
 namespace Pawns {
+
+void init() {
+	for (Square s = SQ_A1; s <= SQ_H8; s++)
+		WeightedPawnPosition[s] = (PawnPosition[s] * Options["Standard Pawn Position"]) / 100;
+}
 
 /// probe() takes a position object as input, computes a Entry object, and returns
 /// a pointer to it. The result is also stored in a hash table, so we don't have
