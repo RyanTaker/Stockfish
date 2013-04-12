@@ -78,6 +78,8 @@ void init(OptionsMap& o) {
   */
   o["King Centalization"]          = Option(3,   0, 20,  on_eval);
   o["Center Control (MG)"]         = Option(5 ,  0, 100, on_eval);
+  o["Pawn Central Control"]        = Option(100, 0, 200, on_eval);
+  o["Standard Pawn Position"]      = Option(100, 0, 200, on_eval);
   o["Passed Pawns (Middle Game)"]  = Option(100, 0, 200, on_eval);
   o["Passed Pawns (Endgame)"]      = Option(100, 0, 200, on_eval);
   o["Space"]                       = Option(100, 0, 200, on_eval);

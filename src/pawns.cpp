@@ -23,6 +23,7 @@
 #include "bitcount.h"
 #include "pawns.h"
 #include "position.h"
+#include "ucioption.h"
 
 namespace {
 
@@ -171,7 +172,7 @@ namespace {
 		if (!passed) {
 			// Based off of pawn position
 			Square relative = f <= FILE_D ? relative_square(Us, s) : mirror(relative_square(Us, s));
-			value += PawnPosition[relative];
+			value += (PawnPosition[relative] * Options["Standard Pawn Position"]) / 100;
 		}
 
         // Passed pawns will be properly scored in evaluation because we need

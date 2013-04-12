@@ -99,10 +99,13 @@ void initPSQ() {
 
 		int mod = Options["Piece-Square Table Influence"];
 
+		if (pt == PAWN)
+			mod = Options["Pawn Central Control"];
+
 		for (Square s = SQ_A1; s <= SQ_H8; s++)
 		{
-			Score psq = make_score(mg_value(PSQT[pt][s]) * mod / 100,
-								   eg_value(PSQT[pt][s]) * mod / 100);
+			Score psq = make_score((mg_value(PSQT[pt][s]) * mod) / 100,
+								   (eg_value(PSQT[pt][s]) * mod) / 100);
 
 			Score white =   v + psq;
 			Score black = -(v + psq);
