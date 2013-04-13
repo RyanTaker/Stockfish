@@ -996,10 +996,6 @@ Value do_evaluate(const Position& pos, Value& margin) {
         margins[Us] += mg_value(KingDangerTable[Us == Search::RootColor][attackUnits]);
     }
 
-	int centerDist = std::min(std::min(square_distance(ksq, SQ_D4), square_distance(ksq, SQ_D5)),
-		std::min(square_distance(ksq, SQ_E4), square_distance(ksq, SQ_E5)));
-	score -= KingDistanceDeduction * (centerDist * centerDist);
-
     if (Trace)
         TracedScores[Us][KING] = score;
 
