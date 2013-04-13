@@ -179,7 +179,7 @@ namespace {
   // Penalty for an undefended bishop or knight
   const Score UndefendedMinorPenalty = make_score(25, 10);
 
-  const Score BadBishopCoeff = make_score(11, 5);
+  const Score BadBishopCoeff = make_score(18, 18);
 
   // The SpaceMask[Color] contains the area of the board which is considered
   // by the space evaluation. In the middle game, each side is given a bonus
@@ -585,7 +585,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
                  score += BishopPinBonus;
 
 		if (Piece == BISHOP)
-			score -= BadBishopCoeff * (ei.pi->central_pawns_of_same_color(s, Us) - 2);
+			score -= BadBishopCoeff * ei.pi->central_pawns_of_same_color(s, Us);
 
         // Bishop and knight outposts squares
         if (    (Piece == BISHOP || Piece == KNIGHT)

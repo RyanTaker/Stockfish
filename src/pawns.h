@@ -40,9 +40,7 @@ struct Entry {
   int file_is_half_open(Color c, File f) const { return halfOpenFiles[c] & (1 << int(f)); }
   int has_open_file_to_left(Color c, File f) const { return halfOpenFiles[c] & ((1 << int(f)) - 1); }
   int has_open_file_to_right(Color c, File f) const { return halfOpenFiles[c] & ~((1 << int(f+1)) - 1); }
-  int central_pawns_of_same_color(Square s, Color Us) const {
-	  return (SquareBB[SQ_A1] & same_color_squares(s)) ? ecpcB[Us] :
-		ecpcW[Us]; }
+  int central_pawns_of_same_color(Square s, Color Us) const { return (SquareBB[SQ_A1] & same_color_squares(s)) ? ecpcB[Us] : ecpcW[Us]; }
 
   template<Color Us>
   Score king_safety(const Position& pos, Square ksq)  {
