@@ -184,8 +184,8 @@ enum Value {
   PawnValueMg   = 198,   PawnValueEg   = 250,
   KnightValueMg = 817,   KnightValueEg = 846,
   BishopValueMg = 836,   BishopValueEg = 857,
-  RookValueMg   = 1270,  RookValueEg   = 1278,
-  QueenValueMg  = 2521,  QueenValueEg  = 2558
+  RookValueMg   = 1270,  RookValueEg   = 1281,
+  QueenValueMg  = 2529,  QueenValueEg  = 2558
 };
 
 enum PieceType {

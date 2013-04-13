@@ -264,6 +264,11 @@ namespace {
     15, 15, 15, 15, 15, 15, 15, 15
   };
 
+  const Score RookOnAHBonus = make_score(-12, 0);
+  const Score RookOnBGBonus = make_score( -7, 0);
+  const Score RookOnCFBonus = make_score( -2, 0);
+  const Score RookOnDEBonus = make_score(  2, 0);
+
   // KingDangerTable[Color][attackUnits] contains the actual king danger
   // weighted scores, indexed by color and by a calculated integer number.
   Score KingDangerTable[COLOR_NB][128];
@@ -717,12 +722,18 @@ Value do_evaluate(const Position& pos, Value& margin) {
             && !(pos.pieces(Them, PAWN) & attack_span_mask(Us, s)))
             score += evaluate_outposts<Piece, Us>(pos, ei, s);
 
+		bool onSeventh = false;
+		bool openOrHalf = false;
+
         if ((Piece == ROOK || Piece == QUEEN) && relative_rank(Us, s) >= RANK_5)
         {
             // Major piece on 7th rank
             if (   relative_rank(Us, s) == RANK_7
-                && relative_rank(Us, pos.king_square(Them)) == RANK_8)
+                && relative_rank(Us, pos.king_square(Them)) == RANK_8) {
+				onSeventh = true;
+
                 score += (Piece == ROOK ? RookOn7thBonus : QueenOn7thBonus);
+			}
 
             // Major piece attacking pawns on the same rank
             Bitboard pawns = pos.pieces(Them, PAWN) & rank_bb(s);
@@ -759,6 +770,8 @@ Value do_evaluate(const Position& pos, Value& margin) {
             f = file_of(s);
             if (ei.pi->file_is_half_open(Us, f))
             {
+				openOrHalf = true;
+
                 if (ei.pi->file_is_half_open(Them, f))
                     score += RookOpenFileBonus;
                 else
@@ -792,6 +805,19 @@ Value do_evaluate(const Position& pos, Value& margin) {
             }
         }
     }
+
+	if (Piece == ROOK && !onSeventh && !openOrHalf) {
+		File f = file_of(f);
+
+		if(f == FILE_A || f == FILE_H)
+			score += RookOnAHBonus;
+		else if(f == FILE_B || f == FILE_G)
+			score += RookOnBGBonus;
+		else if(f == FILE_C || f == FILE_F)
+			score += RookOnCFBonus;
+		else if(f == FILE_D || f == FILE_E)
+			score += RookOnDEBonus;
+	}
 
     if (Trace)
         TracedScores[Us][Piece] = score;
