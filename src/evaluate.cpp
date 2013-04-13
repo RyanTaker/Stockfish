@@ -21,7 +21,6 @@
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
-#include <iostream>
 
 #include "bitcount.h"
 #include "evaluate.h"
@@ -239,7 +238,6 @@ namespace {
   // the strength of the enemy attack are added up into an integer, which
   // is used as an index to KingDangerTable[].
   //
-
   // KingAttackWeights[PieceType] contains king attack weights by piece type
   const int KingAttackWeights[] = { 0, 0, 2, 2, 3, 5 };
 
@@ -886,8 +884,8 @@ Value do_evaluate(const Position& pos, Value& margin) {
 
     // Sum up all attacked squares
     ei.attackedBy[Us][ALL_PIECES] =   ei.attackedBy[Us][PAWN]   | ei.attackedBy[Us][KNIGHT]
-                                   | ei.attackedBy[Us][BISHOP] | ei.attackedBy[Us][ROOK]
-                                   | ei.attackedBy[Us][QUEEN]  | ei.attackedBy[Us][KING];
+                                    | ei.attackedBy[Us][BISHOP] | ei.attackedBy[Us][ROOK]
+                                    | ei.attackedBy[Us][QUEEN]  | ei.attackedBy[Us][KING];
     return score;
   }
 
