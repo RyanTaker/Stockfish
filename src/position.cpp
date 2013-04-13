@@ -97,15 +97,20 @@ void initPSQ() {
 
 		Score v = make_score(PieceValue[MG][pt], PieceValue[EG][pt]);
 
-		int mod = Options["Piece-Square Table Influence"];
+		int modMg = Options["PSQT: Default (MG)"];
+		int modEg = Options["PSQT: Default (EG)"];
 
-		if (pt == PAWN)
-			mod = Options["Pawn Central Control"];
+		if (pt == PAWN) {
+			modMg = Options["PSQT: Center Control (MG)"];
+		} else if (pt == KING) {
+			modMg = Options["PSQT: King Safety (MG)"];
+			modEg = Options["PSQT: King in Center (EG)"];
+		}
 
 		for (Square s = SQ_A1; s <= SQ_H8; s++)
 		{
-			Score psq = make_score((mg_value(PSQT[pt][s]) * mod) / 100,
-								   (eg_value(PSQT[pt][s]) * mod) / 100);
+			Score psq = make_score((mg_value(PSQT[pt][s]) * modMg) / 100,
+								   (eg_value(PSQT[pt][s]) * modEg) / 100);
 
 			Score white =   v + psq;
 			Score black = -(v + psq);

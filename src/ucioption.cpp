@@ -73,12 +73,16 @@ void init(OptionsMap& o) {
   o["Mobility (Endgame)"]          = Option(100, 0, 200, on_eval);
   o["King Centalization"]          = Option(3,   0, 20,  on_eval);
   o["Center Control (MG)"]         = Option(5 ,  0, 100, on_eval);
-  o["Pawn Central Control"]        = Option(100, 0, 200, on_eval);
   o["Standard Pawn Position"]      = Option(100, 0, 200, on_eval);
   o["Passed Pawns (Middle Game)"]  = Option(100, 0, 200, on_eval);
   o["Passed Pawns (Endgame)"]      = Option(100, 0, 200, on_eval);
   o["Space"]                       = Option(100, 0, 200, on_eval);
-  o["Piece-Square Table Influence"]= Option( 80, 0, 200, on_eval);
+  o["PSQT: Center Control (MG)"]   = Option(100, 0, 200, on_eval);
+  o["PSQT: Default (MG)"]          = Option( 80, 0, 200, on_eval);
+  o["PSQT: Default (EG)"]          = Option( 80, 0, 200, on_eval);
+  o["PSQT: King Safety (MG)"]      = Option(100, 0, 200, on_eval);
+  o["PSQT: King in Center (EG)"]   = Option(100, 0, 200, on_eval);
+
   o["Aggressiveness"]              = Option(100, 0, 200, on_eval);
   o["Cowardice"]                   = Option(100, 0, 200, on_eval);
   o["Min Split Depth"]             = Option(msd, 4, 12, on_threads);
