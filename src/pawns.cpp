@@ -99,8 +99,6 @@ namespace {
 
   Score WeightedPawnPosition[SQUARE_NB];
 
-
-
   template<Color Us>
   Score evaluate_pawns(const Position& pos, Bitboard ourPawns,
                        Bitboard theirPawns, Pawns::Entry* e) {

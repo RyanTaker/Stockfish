@@ -42,7 +42,7 @@ namespace {
 
     // attackedBy[color][piece type] is a bitboard representing all squares
     // attacked by a given color and piece type, attackedBy[color][ALL_PIECES]
-	// contains all squares attacked by the given color.
+    // contains all squares attacked by the given color.
     Bitboard attackedBy[COLOR_NB][PIECE_TYPE_NB];
 
 	// controlledBy[color] is a board representing the squares controled by
@@ -93,7 +93,7 @@ namespace {
   //
   // Values modified by Joona Kiiski
   const Score WeightsInternal[] = {
-      S(289, 344), S(221, 273), S(96, 0), S(271, 0), S(307, 0)
+      S(289, 344), S(221, 273), S(54, 0), S(271, 0), S(307, 0)
   };
 
   // MobilityBonus[PieceType][attacked] contains mobility bonuses for middle and
@@ -160,18 +160,18 @@ namespace {
 
   #undef S
 
-  const Score BishopPinBonus = make_score(78, 11);
+  const Score BishopPinBonus = make_score(66, 11);
 
   // Bonus for having the side to move (modified by Joona Kiiski)
-  const Score Tempo = make_score(24, 12);
+  const Score Tempo = make_score(24, 11);
 
   // Rooks and queens on the 7th rank
-  const Score RookOn7thBonus  = make_score(5, 17);
-  const Score QueenOn7thBonus = make_score(4, 14);
+  const Score RookOn7thBonus  = make_score(5, 27);
+  const Score QueenOn7thBonus = make_score(3, 14);
 
   // Rooks and queens attacking pawns on the same rank
-  const Score RookOnPawnBonus  = make_score(3, 20);
-  const Score QueenOnPawnBonus = make_score(1, 11);
+  const Score RookOnPawnBonus  = make_score(3, 48);
+  const Score QueenOnPawnBonus = make_score(1, 10);
 
   // Rooks on open files (modified by Joona Kiiski)
   const Score RookOpenFileBonus     = make_score(49, 21);
@@ -184,10 +184,10 @@ namespace {
   // Penalty for a bishop on a1/h1 (a8/h8 for black) which is trapped by
   // a friendly pawn on b2/g2 (b7/g7 for black). This can obviously only
   // happen in Chess960 games.
-  const Score TrappedBishopA1H1Penalty = make_score(140, 200);
+  const Score TrappedBishopA1H1Penalty = make_score(100, 100);
 
   // Penalty for an undefended bishop or knight
-  const Score UndefendedMinorPenalty = make_score(28, 10);
+  const Score UndefendedMinorPenalty = make_score(25, 10);
 
   const Bitboard MainCenter =
 	  (1ULL << SQ_D5) | (1ULL << SQ_E5) |
