@@ -672,6 +672,9 @@ Value do_evaluate(const Position& pos, Value& margin) {
     File f;
     Score score = SCORE_ZERO;
 
+	bool onSeventh = false;
+	bool openOrHalf = false;
+
     const Color Them = (Us == WHITE ? BLACK : WHITE);
     const Square* pl = pos.piece_list(Us, Piece);
 
@@ -721,9 +724,6 @@ Value do_evaluate(const Position& pos, Value& margin) {
         if (    (Piece == BISHOP || Piece == KNIGHT)
             && !(pos.pieces(Them, PAWN) & attack_span_mask(Us, s)))
             score += evaluate_outposts<Piece, Us>(pos, ei, s);
-
-		bool onSeventh = false;
-		bool openOrHalf = false;
 
         if ((Piece == ROOK || Piece == QUEEN) && relative_rank(Us, s) >= RANK_5)
         {
@@ -807,8 +807,6 @@ Value do_evaluate(const Position& pos, Value& margin) {
     }
 
 	if (Piece == ROOK && !onSeventh && !openOrHalf) {
-		File f = file_of(f);
-
 		if(f == FILE_A || f == FILE_H)
 			score += RookOnAHBonus;
 		else if(f == FILE_B || f == FILE_G)
