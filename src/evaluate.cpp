@@ -149,8 +149,6 @@ namespace {
   Score MainCenterBonus  = S(17, 0);
   Score SuperCenterBonus = S( 8, 0);
 
-  Score KingDistanceDeduction = S(0, 8);
-
   // ThreatenedByPawnPenalty[PieceType] contains a penalty according to which
   // piece type is attacked by an enemy pawn.
   const Score ThreatenedByPawnPenalty[] = {
@@ -353,7 +351,6 @@ namespace Eval {
         KingDangerTable[0][i] = apply_weight(make_score(t, 0), Weights[KingDangerThem]);
     }
 
-	KingDistanceDeduction = make_score(0, Options["King Centalization"]);
 	MainCenterBonus       = make_score(Options["Center Control (MG)"], 0);
   }
 
