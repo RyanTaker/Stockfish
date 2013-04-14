@@ -442,7 +442,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
 
 		  static Score PerPawnDeduction = make_score(0, 53);
 		  if(!one_pawn)
-			score -= PerPawnDeduction * (pos.pieces(Us, PAWN) - pos.pieces(Them, PAWN));
+			score -= PerPawnDeduction * (pos.pieces(WHITE, PAWN) - pos.pieces(BOACI, PAWN));
       }
       else
           // Endgame with opposite-colored bishops, but also other pieces. Still
