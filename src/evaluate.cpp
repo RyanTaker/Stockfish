@@ -443,7 +443,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
           sf = one_pawn ? ScaleFactor(8) : ScaleFactor(32);
 
 		  if(!one_pawn)
-			score -= PerPawnDeduction * (pos.pieces(WHITE, PAWN) - pos.pieces(BLACK, PAWN));
+			  score -= PerPawnDeduction * (pos.piece_count(WHITE, PAWN) - pos.piece_count(BLACK, PAWN));
       }
       else
           // Endgame with opposite-colored bishops, but also other pieces. Still
