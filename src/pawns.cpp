@@ -99,14 +99,17 @@ namespace {
 
 	if(isLined) {
 		Bitboard remainingBlack = pos.pieces(BLACK, PAWN);
-		Bitboard remainingWhite = pos.pieces(WHITE, PAWN);
 
-		Bitboard buf;
+		Bitboard buf = pos.pieces(WHITE, PAWN);
+		Bitboard hit;
 
 		for(int i = 1; remainingBlack && i <= 5; i++) {
-			buf = ~(remainingWhite << (i * 8));
-			remainingBlack = remainingBlack & buf;
-			remainingWhite = remainingWhite & buf;
+			buf = (buf << 8);
+
+			hit = remainingBlack & buf;
+			remainingBlack &= ~buf;
+
+			buf &= ~hit;
 		}
 
 		isLined = !remainingBlack;
