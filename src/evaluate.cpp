@@ -439,6 +439,10 @@ Value do_evaluate(const Position& pos, Value& margin) {
           // certainly a draw or at least two pawns.
           bool one_pawn = (pos.piece_count(WHITE, PAWN) + pos.piece_count(BLACK, PAWN) == 1);
           sf = one_pawn ? ScaleFactor(8) : ScaleFactor(32);
+
+		  static Score PerPawnDeduction = make_score(0, 53);
+		  if(!one_pawn)
+			score -= PerPawnDeduction * (pos.pieces(Us, PAWN) - pos.pieces(Them, PAWN));
       }
       else
           // Endgame with opposite-colored bishops, but also other pieces. Still
