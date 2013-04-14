@@ -98,8 +98,18 @@ namespace {
 	bool isLined = pos.piece_count(Us, PAWN) == pos.piece_count(Them, PAWN);
 
 	if(isLined) {
-		for(File f = FILE_A; f <= FILE_H && isLined; f++)
-			isLined = popcount<Max15>(ourPawns & file_bb(f)) == popcount<Max15>(theirPawns & file_bb(f));
+		Bitboard remainingBlack = pos.pieces(BLACK, PAWN);
+		Bitboard remainingWhite = pos.pieces(WHITE, PAWN);
+
+		Bitboard buf;
+
+		for(int i = 1; remainingBlack && i <= 5; i++) {
+			buf = ~(remainingWhite << i * 8);
+			remainingBlack = remainingBlack & buf;
+			remainingWhite = remainingWhite & buf;
+		}
+
+		isLined = !(remainingBlack || remainingWhite);
 	}
 
 	e->isLined = isLined;
