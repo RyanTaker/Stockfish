@@ -167,6 +167,8 @@ namespace {
   const Score RookOpenFileBonus     = make_score(43, 21);
   const Score RookHalfOpenFileBonus = make_score(19, 10);
 
+  const Score PerPawnDeduction = make_score(0, 53);
+
   // Penalty for rooks trapped inside a friendly king which has lost the
   // right to castle.
   const Value TrappedRookPenalty = Value(180);
@@ -440,9 +442,8 @@ Value do_evaluate(const Position& pos, Value& margin) {
           bool one_pawn = (pos.piece_count(WHITE, PAWN) + pos.piece_count(BLACK, PAWN) == 1);
           sf = one_pawn ? ScaleFactor(8) : ScaleFactor(32);
 
-		  static Score PerPawnDeduction = make_score(0, 53);
 		  if(!one_pawn)
-			score -= PerPawnDeduction * (pos.pieces(WHITE, PAWN) - pos.pieces(BOACI, PAWN));
+			score -= PerPawnDeduction * (pos.pieces(WHITE, PAWN) - pos.pieces(BLACK, PAWN));
       }
       else
           // Endgame with opposite-colored bishops, but also other pieces. Still
