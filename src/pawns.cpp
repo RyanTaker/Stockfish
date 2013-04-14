@@ -104,12 +104,12 @@ namespace {
 		Bitboard buf;
 
 		for(int i = 1; remainingBlack && i <= 5; i++) {
-			buf = ~(remainingWhite << i * 8);
+			buf = ~(remainingWhite << (i * 8));
 			remainingBlack = remainingBlack & buf;
 			remainingWhite = remainingWhite & buf;
 		}
 
-		isLined = !(remainingBlack || remainingWhite);
+		isLined = !remainingBlack;
 	}
 
 	e->isLined = isLined;
