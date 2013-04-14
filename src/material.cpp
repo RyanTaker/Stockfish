@@ -38,14 +38,16 @@ namespace {
   const Value RedundantQueenPenalty = Value(320);
   const Value RedundantRookPenalty  = Value(554);
 
+  const Value ExtraPawnKnightBonus = Value(20);
+
   //                                  pair  pawn knight bishop rook queen
-  const int LinearCoefficients[6] = { 1617, -162, -1172, -190,  105,  26 };
+  const int LinearCoefficients[6] = { 1617, -162, -50,  -190,  105,  26 };
 
   const int QuadraticCoefficientsSameColor[][PIECE_TYPE_NB] = {
     // pair pawn knight bishop rook queen
     {   7                               }, // Bishop pair
     {  39,    2                         }, // Pawn
-    {  35,  271,  -4                    }, // Knight
+    {  35,   27,  -4                    }, // Knight
     {   7,   25,   4,    7              }, // Bishop
     { -27,   -2,  46,   100,   56       }, // Rook
     {  58,   29,  83,   148,   -3,  -25 }  // Queen
@@ -111,6 +113,10 @@ namespace {
     if (pieceCount[Us][ROOK] > 0)
         value -=  RedundantRookPenalty * (pieceCount[Us][ROOK] - 1)
                 + RedundantQueenPenalty * pieceCount[Us][QUEEN];
+
+	int extraPawns = std::max(0, pieceCount[Us][PAWN] - 5);
+
+	value += ExtraPawnKnightBonus * pieceCount[Us][KNIGHT] * extraPawns;
 
     // Second-degree polynomial material imbalance by Tord Romstad
     for (pt1 = NO_PIECE_TYPE; pt1 <= QUEEN; pt1++)
