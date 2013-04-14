@@ -449,8 +449,8 @@ Value do_evaluate(const Position& pos, Value& margin) {
   if (ei.mi->game_phase() < PHASE_MIDGAME
 	  && pos.non_pawn_material(WHITE) <= RookValueMg + KnightValueMg
 	  && pos.non_pawn_material(BLACK) <= RookValueMg + KnightValueMg
-	  && sf == SCALE_FACTOR_NORMAL)
-		sf = ScaleFactor(45);
+	  && ei.pi->isLined)
+		sf = sf / 2;
 
   margin = margins[pos.side_to_move()];
   Value v = interpolate(score, ei.mi->game_phase(), sf);
