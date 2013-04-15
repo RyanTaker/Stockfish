@@ -764,6 +764,8 @@ Value do_evaluate(const Position& pos, Value& margin) {
                         | ei.attackedBy[Us][BISHOP] | ei.attackedBy[Us][ROOK]
                         | ei.attackedBy[Us][QUEEN]);
 
+		Bitboard flees = ei.attackedBy[Us][KING] & ~pos.pieces(Us) & ~ei.attackedBy[Them][0];
+
         // Initialize the 'attackUnits' variable, which is used later on as an
         // index to the KingDangerTable[] array. The initial value is based on
         // the number and types of the enemy's attacking pieces, the number of
@@ -771,8 +773,9 @@ Value do_evaluate(const Position& pos, Value& margin) {
         // king, and the quality of the pawn shelter.
         attackUnits =  std::min(25, (ei.kingAttackersCount[Them] * ei.kingAttackersWeight[Them]) / 2)
                      + 3 * (ei.kingAdjacentZoneAttacksCount[Them] + popcount<Max15>(undefended))
+					 + 3 * std::max(0, 6 - popcount<Max15>(flees))
                      + InitKingDanger[relative_square(Us, ksq)]
-                     - mg_value(score) / 32;
+                     - mg_value(score) / 28;
 
         // Analyse enemy's safe queen contact checks. First find undefended
         // squares around the king attacked by enemy queen...
