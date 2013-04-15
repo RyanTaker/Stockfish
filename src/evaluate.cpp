@@ -91,27 +91,6 @@ namespace {
       S(289, 344), S(221, 273), S(46, 0), S(271, 0), S(307, 0)
   };
 
-  // MobilityBonus[PieceType][attacked] contains mobility bonuses for middle and
-  // end game, indexed by piece type and number of attacked squares not occupied
-  // by friendly pieces.
-  const Score MobilityBonus[][32] = {
-     {}, {},
-     { S(-38,-33), S(-25,-23), S(-12,-13), S( 0, -3), S(12,  7), S(25, 17), // Knights
-       S( 31, 22), S( 38, 27), S( 38, 27) },
-     { S(-25,-30), S(-11,-16), S(  3, -2), S(17, 12), S(31, 26), S(45, 40), // Bishops
-       S( 57, 52), S( 65, 60), S( 71, 65), S(74, 69), S(76, 71), S(78, 73),
-       S( 79, 74), S( 80, 75), S( 81, 76), S(81, 76) },
-     { S(-20,-36), S(-14,-19), S( -8, -3), S(-2, 13), S( 4, 29), S(10, 46), // Rooks
-       S( 14, 62), S( 19, 79), S( 23, 95), S(26,106), S(27,111), S(28,114),
-       S( 29,116), S( 30,117), S( 31,118), S(32,118) },
-     { S(-10,-18), S( -8,-13), S( -6, -7), S(-3, -2), S(-1,  3), S( 1,  8), // Queens
-       S(  3, 13), S(  5, 19), S(  8, 23), S(10, 27), S(12, 32), S(15, 34),
-       S( 16, 35), S( 17, 35), S( 18, 35), S(20, 35), S(20, 35), S(20, 35),
-       S( 20, 35), S( 20, 35), S( 20, 35), S(20, 35), S(20, 35), S(20, 35),
-       S( 20, 35), S( 20, 35), S( 20, 35), S(20, 35), S(20, 35), S(20, 35),
-       S( 20, 35), S( 20, 35) }
-  };
-
   // OutpostBonus[PieceType][Square] contains outpost bonuses of knights and
   // bishops, indexed by piece type and square (from white's point of view).
   const Value OutpostBonus[][SQUARE_NB] = {
@@ -225,6 +204,11 @@ namespace {
   // weighted scores, indexed by color and by a calculated integer number.
   Score KingDangerTable[COLOR_NB][128];
 
+  // MobilityBonus[PieceType][attacked] contains mobility bonuses for middle and
+  // end game, indexed by piece type and number of attacked squares not occupied
+  // by friendly pieces.
+  Score MobilityBonus[6][32];
+
   // TracedTerms[Color][PieceType || TracedType] contains a breakdown of the
   // evaluation terms, used when tracing.
   Score TracedScores[COLOR_NB][16];
@@ -299,6 +283,26 @@ namespace Eval {
         KingDangerTable[1][i] = apply_weight(make_score(t, 0), Weights[KingDangerUs]);
         KingDangerTable[0][i] = apply_weight(make_score(t, 0), Weights[KingDangerThem]);
     }
+
+	// Calculate mobility bonuses
+	for (int x = 0; x < 32; x++) {
+		// Knight
+		MobilityBonus[KNIGHT][x] = make_score(
+			std::min(38, -38 + 13 * x),  // MG
+			std::min(27, -33 + 10 * x)); // EG
+		// Bishop
+		MobilityBonus[BISHOP][x] = make_score(
+			std::min(81, -25 + 14 * x),  // MG
+			std::min(76, -30 + 14 * x)); // EG
+		// Rook
+		MobilityBonus[ROOK][x]   = make_score(
+			std::min(32,  -20 +  6 * x),  // MG
+			std::min(118, -36 + 17 * x)); // EG
+		// Queen
+		MobilityBonus[QUEEN][x]  = make_score(
+			std::min(20, -10 + 2 * x),  // MG
+			std::min(35, -18 + 5 * x)); // EG
+	}
   }
 
 
