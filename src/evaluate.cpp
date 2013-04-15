@@ -186,48 +186,13 @@ namespace {
   // Penalty for an undefended bishop or knight
   const Score UndefendedMinorPenalty = make_score(25, 10);
 
-  const Bitboard MainCenter =
-	  (1ULL << SQ_D5) | (1ULL << SQ_E5) |
-	  (1ULL << SQ_D4) | (1ULL << SQ_E4);
+  Bitboard MainCenter;
+  Bitboard BoardEdge;
 
-  const Bitboard WhiteQueenside = 
-	(1ULL << SQ_A4) | (1ULL << SQ_B4) | (1ULL << SQ_C4) | (1ULL << SQ_D4) |
-	(1ULL << SQ_A3) | (1ULL << SQ_B3) | (1ULL << SQ_C3) | (1ULL << SQ_D3) |
-	(1ULL << SQ_A2) | (1ULL << SQ_B2) | (1ULL << SQ_C2) | (1ULL << SQ_D2) |
-	(1ULL << SQ_A1) | (1ULL << SQ_B1) | (1ULL << SQ_C1) | (1ULL << SQ_D1);
+  Bitboard EnemyKingside [COLOR_NB] = { BlackKingside,  WhiteKingside };
+  Bitboard EnemyQueenside[COLOR_NB] = { BlackQueenside, WhiteQueenside };
 
-  const Bitboard WhiteKingside = 
-	(1ULL << SQ_E4) | (1ULL << SQ_F4) | (1ULL << SQ_G4) | (1ULL << SQ_H4) |
-	(1ULL << SQ_E3) | (1ULL << SQ_F3) | (1ULL << SQ_G3) | (1ULL << SQ_H3) |
-	(1ULL << SQ_E2) | (1ULL << SQ_F2) | (1ULL << SQ_G2) | (1ULL << SQ_H2) |
-	(1ULL << SQ_E1) | (1ULL << SQ_F1) | (1ULL << SQ_G1) | (1ULL << SQ_H1);
-
-  const Bitboard BlackQueenside = 
-	(1ULL << SQ_A8) | (1ULL << SQ_B8) | (1ULL << SQ_C8) | (1ULL << SQ_D8) |
-	(1ULL << SQ_A7) | (1ULL << SQ_B7) | (1ULL << SQ_C7) | (1ULL << SQ_D7) |
-	(1ULL << SQ_A6) | (1ULL << SQ_B6) | (1ULL << SQ_C6) | (1ULL << SQ_D6) |
-	(1ULL << SQ_A5) | (1ULL << SQ_B5) | (1ULL << SQ_C5) | (1ULL << SQ_D5);
-
-  const Bitboard BlackKingside = 
-	(1ULL << SQ_E8) | (1ULL << SQ_F8) | (1ULL << SQ_G8) | (1ULL << SQ_H8) |
-	(1ULL << SQ_E7) | (1ULL << SQ_F7) | (1ULL << SQ_G7) | (1ULL << SQ_H7) |
-	(1ULL << SQ_E6) | (1ULL << SQ_F6) | (1ULL << SQ_G6) | (1ULL << SQ_H6) |
-	(1ULL << SQ_E5) | (1ULL << SQ_F5) | (1ULL << SQ_G5) | (1ULL << SQ_H5);
-
-  const Bitboard BoardEdge =
-	(1ULL << SQ_A8) | (1ULL << SQ_B8) | (1ULL << SQ_C8) | (1ULL << SQ_D8) | (1ULL << SQ_E8) | (1ULL << SQ_F8) | (1ULL << SQ_G8) | (1ULL << SQ_H8) |
-	(1ULL << SQ_A7)                                                       |                                                       (1ULL << SQ_H7) |
-	(1ULL << SQ_A6)                                                       |                                                       (1ULL << SQ_H6) |
-	(1ULL << SQ_A5)                                                       |                                                       (1ULL << SQ_H5) |
-	(1ULL << SQ_A4)                                                       |                                                       (1ULL << SQ_H4) |
-	(1ULL << SQ_A3)                                                       |                                                       (1ULL << SQ_H3) |
-	(1ULL << SQ_A2)                                                       |                                                       (1ULL << SQ_H2) |
-	(1ULL << SQ_A1) | (1ULL << SQ_B1) | (1ULL << SQ_C1) | (1ULL << SQ_D1) | (1ULL << SQ_E1) | (1ULL << SQ_F1) | (1ULL << SQ_G1) | (1ULL << SQ_H1);
-
-  const Bitboard EnemyKingside [COLOR_NB] = { BlackKingside,  WhiteKingside };
-  const Bitboard EnemyQueenside[COLOR_NB] = { BlackQueenside, WhiteQueenside };
-
-  const Bitboard SpaceMask[COLOR_NB] =
+  Bitboard SpaceMask[COLOR_NB] =
      {(BlackKingside | BlackQueenside) & ~BoardEdge & ~MainCenter,
 	  (WhiteKingside | WhiteQueenside) & ~BoardEdge & ~MainCenter};
 
