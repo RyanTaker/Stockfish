@@ -284,24 +284,19 @@ namespace Eval {
         KingDangerTable[0][i] = apply_weight(make_score(t, 0), Weights[KingDangerThem]);
     }
 
-	// Calculate mobility bonuses
-	for (int x = 0; x < 32; x++) {
-		// Knight
+	for (int x = 0; x < 32; x++) { // Calculate mobility bonuses
 		MobilityBonus[KNIGHT][x] = make_score(
-			std::min(38, -38 + 13 * x),  // MG
-			std::min(27, -33 + 10 * x)); // EG
-		// Bishop
+			std::min(38, -38 + 13 * x),  // Knight MG
+			std::min(27, -33 + 10 * x)); // Knight EG
 		MobilityBonus[BISHOP][x] = make_score(
-			std::min(81, -25 + 14 * x),  // MG
-			std::min(76, -30 + 14 * x)); // EG
-		// Rook
+			std::min(81, -25 + 14 * x),  // Bishop MG
+			std::min(76, -30 + 14 * x)); // Bishop EG
 		MobilityBonus[ROOK][x]   = make_score(
-			std::min(32,  -20 +  6 * x),  // MG
-			std::min(118, -36 + 17 * x)); // EG
-		// Queen
+			std::min(32,  -20 +  6 * x),  // Rook MG
+			std::min(118, -36 + 17 * x)); // Rook EG
 		MobilityBonus[QUEEN][x]  = make_score(
-			std::min(20, -10 + 2 * x),  // MG
-			std::min(35, -18 + 5 * x)); // EG
+			std::min(20, -10 + 2 * x),  // Queen MG
+			std::min(35, -18 + 5 * x)); // Queen EG
 	}
   }
 
