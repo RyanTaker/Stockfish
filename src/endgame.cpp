@@ -931,7 +931,7 @@ ScaleFactor Endgame<KRBPKRB>::operator()(const Position& pos) const {
   Square bishopSq = pos.piece_list(weakerSide, BISHOP)[0];
 
   if(pos.opposite_bishops() &&
-	  (forward_bb(strongerSide, pawnSq) & pos.attacks_from<BISHOP>(bishopSq)))
+	  (forward_bb(strongerSide, pawnSq) & ~rank_bb(relative_rank(weakerSide, RANK_2)) & pos.attacks_from<BISHOP>(bishopSq)))
 	  return SCALE_FACTOR_DRAW;
 
   return SCALE_FACTOR_NONE;
