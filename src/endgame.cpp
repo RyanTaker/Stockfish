@@ -106,6 +106,7 @@ Endgames::Endgames() {
   add<KBPKN>("KBPKN");
   add<KBPPKB>("KBPPKB");
   add<KRPPKRP>("KRPPKRP");
+  add<KRBPKRB>("KRBPKRB");
 }
 
 Endgames::~Endgames() {
@@ -922,6 +923,18 @@ ScaleFactor Endgame<KNPKB>::operator()(const Position& pos) const {
   return SCALE_FACTOR_NONE;
 }
 
+
+template<>
+ScaleFactor Endgame<KRBPKRB>::operator()(const Position& pos) const {
+  
+  Square pawnSq = pos.piece_list(strongerSide, PAWN)[0];
+  Square bishopSq = pos.piece_list(weakerSide, BISHOP)[0];
+
+  if(forward_bb(strongerSide, pawnSq) & pos.attacks_from<BISHOP>(bishopSq))
+	  return SCALE_FACTOR_DRAW;
+
+  return SCALE_FACTOR_NONE;
+}
 
 /// K and a pawn vs K and a pawn. This is done by removing the weakest side's
 /// pawn and probing the KP vs K bitbase: If the weakest side has a draw without

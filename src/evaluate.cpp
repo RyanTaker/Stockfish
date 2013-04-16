@@ -440,10 +440,26 @@ Value do_evaluate(const Position& pos, Value& margin) {
           bool one_pawn = (pos.piece_count(WHITE, PAWN) + pos.piece_count(BLACK, PAWN) == 1);
           sf = one_pawn ? ScaleFactor(8) : ScaleFactor(32);
       }
-      else
+      else {
+		  /*
+		  if (pos.piece_count(WHITE, QUEEN) == 0 &&
+			  pos.piece_count(BLACK, QUEEN) == 0 &&
+			  pos.piece_count(WHITE, KNIGHT) == 0 &&
+			  pos.piece_count(BLACK, KNIGHT) == 0 &&
+			  pos.piece_count(WHITE, BISHOP) == 1 &&
+			  pos.piece_count(BLACK, BISHOP) == 1 &&
+			  pos.piece_count(WHITE, ROOK) == 1 &&
+			  pos.piece_count(BLACK, ROOK) == ) {
+				  if(pos.piece_count(WHITE, PAWN) == 1 &&
+					  ei.attackedBy[WHITE][BISHOP] & forward_bb()
+					  sf = SCALE_FACTOR_DRAW;
+		  }
+		  */
+
           // Endgame with opposite-colored bishops, but also other pieces. Still
           // a bit drawish, but not as drawish as with only the two bishops.
            sf = ScaleFactor(50);
+	  }
   }
 
   margin = margins[pos.side_to_move()];
