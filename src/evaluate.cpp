@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
+#include <cmath>
 
 #include "bitcount.h"
 #include "evaluate.h"
@@ -285,18 +286,20 @@ namespace Eval {
     }
 
 	for (int x = 0; x < 32; x++) { // Calculate mobility bonuses
+		double z = std::log((double)x + 1);
+		
 		MobilityBonus[KNIGHT][x] = make_score(
-			std::min(38, -38 + 13 * x),  // Knight MG
-			std::min(27, -33 + 10 * x)); // Knight EG
+			-38 + z * 80,  // Knight MG
+			-33 + z * 64); // Knight EG
 		MobilityBonus[BISHOP][x] = make_score(
-			std::min(81, -25 + 14 * x),  // Bishop MG
-			std::min(76, -30 +  4 * x)); // Bishop EG
+			-25 + z * 89,  // Bishop MG
+			-30 + z * 89); // Bishop EG
 		MobilityBonus[ROOK][x]   = make_score(
-			std::min(32,  -20 +  6 * x),  // Rook MG
-			std::min(118, -36 + 17 * x)); // Rook EG
+			-20 + z * 45,  // Rook MG
+			-36 + z * 127); // Rook EG
 		MobilityBonus[QUEEN][x]  = make_score(
-			std::min(20, -10 + 2 * x),  // Queen MG
-			std::min(35, -18 + 5 * x)); // Queen EG
+			-10 + z * 20,  // Queen MG
+			-18 + z * 35); // Queen EG
 	}
   }
 
