@@ -290,7 +290,7 @@ namespace Eval {
 			std::min(27, -33 + 10 * x)); // Knight EG
 		MobilityBonus[BISHOP][x] = make_score(
 			std::min(81, -25 + 14 * x),  // Bishop MG
-			std::min(76, -30 + 14 * x)); // Bishop EG
+			std::min(76, -30 +  4 * x)); // Bishop EG
 		MobilityBonus[ROOK][x]   = make_score(
 			std::min(32,  -20 +  6 * x),  // Rook MG
 			std::min(118, -36 + 17 * x)); // Rook EG
