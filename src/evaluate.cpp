@@ -289,17 +289,17 @@ namespace Eval {
 		double z = std::log((double)x + 1);
 		
 		MobilityBonus[KNIGHT][x] = make_score(
-			-38 + z * 80,  // Knight MG
-			-33 + z * 64); // Knight EG
+			-38 + z * 37,  // Knight MG
+			-33 + z * 29); // Knight EG
 		MobilityBonus[BISHOP][x] = make_score(
-			-25 + z * 89,  // Bishop MG
-			-30 + z * 89); // Bishop EG
+			-25 + z * 38,  // Bishop MG
+			-30 + z * 38); // Bishop EG
 		MobilityBonus[ROOK][x]   = make_score(
-			-20 + z * 45,  // Rook MG
-			-36 + z * 127); // Rook EG
+			-20 + z * 19,  // Rook MG
+			-36 + z * 56); // Rook EG
 		MobilityBonus[QUEEN][x]  = make_score(
-			-10 + z * 20,  // Queen MG
-			-18 + z * 35); // Queen EG
+			-10 + z * 9,  // Queen MG
+			-18 + z * 15); // Queen EG
 	}
   }
 
