@@ -154,6 +154,7 @@ namespace {
 
   // Bonus for having the side to move (modified by Joona Kiiski)
   const Score Tempo = make_score(24, 11);
+  const Score RookEndgameTempo = make_score(24, 87);
 
   // Rooks and queens on the 7th rank
   const Score RookOn7thBonus  = make_score(11, 20);
@@ -372,7 +373,12 @@ Value do_evaluate(const Position& pos, Value& margin) {
   // Initialize score by reading the incrementally updated scores included
   // in the position object (material + piece square tables) and adding
   // Tempo bonus. Score is computed from the point of view of white.
-  score = pos.psq_score() + (pos.side_to_move() == WHITE ? Tempo : -Tempo);
+  int otherCount = pos.piece_count(WHITE, KNIGHT) + pos.piece_count(WHITE, BISHOP) + pos.piece_count(WHITE, QUEEN) + 
+        pos.piece_count(BLACK, KNIGHT) + pos.piece_count(BLACK, BISHOP) + pos.piece_count(BLACK, QUEEN);
+  
+  Score tempBonus = ((otherCount > 0) ? Tempo : RookEndgameTempo);
+  
+  score = pos.psq_score() + (pos.side_to_move() == WHITE ? tempBonus : -tempBonus);
 
   // Probe the material hash table
   ei.mi = Material::probe(pos, th->materialTable, th->endgames);
