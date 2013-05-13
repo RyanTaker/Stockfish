@@ -901,6 +901,16 @@ Value do_evaluate(const Position& pos, Value& margin) {
             else if (pos.pieces(Them, ROOK, QUEEN))
                 ebonus -= ebonus / 4;
         }
+        
+        if(Us == Search::RootColor) {
+              mbonus = (mbonus * 2) / 3;
+              ebonus = (ebonus * 2) / 3;
+        }
+        else {
+             mbonus = (mbonus * 3) / 2;
+             ebonus = (ebonus * 3) / 2;
+        }
+        
         score += make_score(mbonus, ebonus);
 
     } while (b);
