@@ -90,6 +90,9 @@ namespace {
   const Score WeightsInternal[] = {
       S(289, 344), S(221, 273), S(46, 0), S(271, 0), S(307, 0)
   };
+  
+  const Score passedPawnsRoot = S(191, 243);
+  const Score passedPawnsEnmy = S(251, 303);
 
   // MobilityBonus[PieceType][attacked] contains mobility bonuses for middle and
   // end game, indexed by piece type and number of attacked squares not occupied
@@ -904,8 +907,10 @@ Value do_evaluate(const Position& pos, Value& margin) {
 
     } while (b);
 
-    // Add the scores to the middle game and endgame eval
-    return apply_weight(score, Weights[PassedPawns]);
+    if(Us == Search::RootColor)
+          return apply_weight(score, passedPawnsRoot);
+
+    return apply_weight(score, passedPawnsEnmy);
   }
 
 
