@@ -396,8 +396,28 @@ Value do_evaluate(const Position& pos, Value& margin) {
           - evaluate_threats<BLACK>(pos, ei);
 
   // Evaluate passed pawns, we need full attack information including king
-  score +=  evaluate_passed_pawns<WHITE>(pos, ei)
+  Score pps = evaluate_passed_pawns<WHITE>(pos, ei)
           - evaluate_passed_pawns<BLACK>(pos, ei);
+          
+  Value ppMg = mg_value(pps);
+  Value ppEg = eg_value(pps);
+  
+  int mod = 10;
+  
+  if(WHITE == Search::RootColor)
+    mod *= -1;
+    
+  if(ppMg > 0)
+    ppMg = (ppMg * (100 + mod)) / 100;
+  else
+    ppMg = (ppMg * (100 - mod)) / 100;
+    
+  if(ppEg > 0)
+    ppEg = (ppEg * (100 + mod)) / 100;
+  else
+    ppEg = (ppEg * (100 - mod)) / 100;
+          
+  score += make_score(ppMg, ppEg);
 
   // If one side has only a king, check whether exists any unstoppable passed pawn
   if (!pos.non_pawn_material(WHITE) || !pos.non_pawn_material(BLACK))
