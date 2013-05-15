@@ -90,6 +90,9 @@ namespace {
   const Score WeightsInternal[] = {
       S(289, 344), S(221, 273), S(46, 0), S(271, 0), S(307, 0)
   };
+  
+  const int SpaceWeightUs = 30;
+  const int SpaceWeightThem = 53;
 
   // MobilityBonus[PieceType][attacked] contains mobility bonuses for middle and
   // end game, indexed by piece type and number of attacked squares not occupied
@@ -407,7 +410,24 @@ Value do_evaluate(const Position& pos, Value& margin) {
   if (ei.mi->space_weight())
   {
       int s = evaluate_space<WHITE>(pos, ei) - evaluate_space<BLACK>(pos, ei);
-      score += apply_weight(make_score(s * ei.mi->space_weight(), 0), Weights[Space]);
+      
+      bool isR = false;
+      
+      if(WHITE == Search::RootColor)
+        isR = true;
+        
+      bool isUp = s > 0;
+      
+      int weight;
+      
+      if((isR && isUp) || (!isR && !isUp))
+        weight = SpaceWeightUs;
+      else
+        weight = SpaceWeightThem;
+        
+      int fin = (s * ei.mi->space_weight() * weight) / 100;
+      
+      score += make_score(fin, 0);
   }
 
   // Scale winning side if position is more drawish that what it appears
