@@ -91,8 +91,8 @@ namespace {
       S(289, 344), S(221, 273), S(46, 0), S(271, 0), S(307, 0)
   };
   
-  const int SpaceWeightUs = 30;
-  const int SpaceWeightThem = 53;
+  const int SpaceWeightUs = 40;
+  const int SpaceWeightThem = 52;
 
   // MobilityBonus[PieceType][attacked] contains mobility bonuses for middle and
   // end game, indexed by piece type and number of attacked squares not occupied
