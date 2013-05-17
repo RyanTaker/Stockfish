@@ -64,7 +64,7 @@ namespace {
     4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 2, 2,
     2, 1, 1, 1, 1, 1, 1, 1 };
 
-  int move_importance(int ply) { return MoveImportance[std::min(ply, 511)]; }
+  int move_importance(int ply) { return std::sqrt(MoveImportance[std::min(ply, 511)]) * 17; }
 
 
   /// Function Prototypes
