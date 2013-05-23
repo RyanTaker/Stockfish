@@ -65,9 +65,8 @@ namespace {
   const Score PawnStructureWeight = S(233, 201);
 
   // Weakness of our pawn shelter in front of the king indexed by [king pawn][rank]
-  const Value ShelterWeakness[2][RANK_NB] =
-  { { V(141), V(0), V(38), V(102), V(128), V(141), V(141) },
-    { V( 61), V(0), V(16), V( 44), V( 56), V( 61), V( 61) } };
+  const Value ShelterWeakness[RANK_NB] =
+  { V(180), V(0), V(34), V(132), V(145), V(163), V(166)};
 
   // Danger of enemy pawns moving toward our king indexed by [pawn blocked][rank]
   const Value StormDanger[2][RANK_NB] =
@@ -244,7 +243,11 @@ Value Entry::shelter_storm(const Position& pos, Square ksq) {
       // Shelter penalty is higher for the pawn in front of the king
       b = ourPawns & FileBB[f];
       rkUs = b ? rank_of(Us == WHITE ? lsb(b) : ~msb(b)) : RANK_1;
-      safety -= ShelterWeakness[f != kf][rkUs];
+      Value weak = ShelterWeakness[rkUs];
+	  if(f != kf)
+		  weak /= 2;
+
+	  safety -= weak;
 
       // Storm danger is smaller if enemy pawn is blocked
       b  = theirPawns & FileBB[f];
