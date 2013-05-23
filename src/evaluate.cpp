@@ -163,6 +163,8 @@ namespace {
   const Score UndefendedMinorPenalty = make_score(25, 10);
   const Score TrappedRookPenalty     = make_score(90,  0);
 
+  const Score RookOnQueenBonus       = make_score(53, 73);
+
   // Penalty for a bishop on a1/h1 (a8/h8 for black) which is trapped by
   // a friendly pawn on b2/g2 (b7/g7 for black). This can obviously only
   // happen in Chess960 games.
@@ -603,6 +605,9 @@ Value do_evaluate(const Position& pos, Value& margin) {
                 && (rank_of(ksq) == rank_of(s) || relative_rank(Us, ksq) == RANK_1)
                 && !ei.pi->half_open_on_side(Us, file_of(ksq), file_of(ksq) < FILE_E))
                 score -= (TrappedRookPenalty - make_score(mob * 8, 0)) * (pos.can_castle(Us) ? 1 : 2);
+
+			if(file_bb(s) & pos.pieces(Them, QUEEN))
+				score -= RookOnQueenBonus;
         }
 
         // An important Chess960 pattern: A cornered bishop blocked by a friendly
