@@ -461,7 +461,7 @@ Value Endgame<KPPK>::operator()(const Position& pos) const {
 		if(eval == Value(-99999999))
 			eval = VALUE_DRAW + 63 * (std::max(alphaRank, betaRank) + 3);
 		else if(alphaFile == FILE_E || alphaFile == FILE_D) {
-			eval += 500; // Doubled pawns on D and E often win even when black has a good position.
+			eval += Value(500); // Doubled pawns on D and E often win even when black has a good position.
 		}
 	}
 
