@@ -1388,21 +1388,19 @@ bool Position::is_draw() const {
       return true;
 
   // Draw by repetition?
-  int i = 4, e = std::min(st->rule50, st->pliesFromNull);
+  int i = 4, e = std::min(st->rule50, st->pliesFromNull), cnt;
 
   if (i <= e)
   {
       StateInfo* stp = st->previous->previous;
 
-      do {
-          stp = stp->previous->previous;
+	  for(cnt = 0; i <= e; i+= 2)
+	  {
+		  stp = stp->previous->previous;
 
-          if (stp->key == st->key)
+          if (stp->key == st->key && ++cnt >= 2)
               return true;
-
-          i += 2;
-
-      } while (i <= e);
+	  }
   }
 
   return false;
