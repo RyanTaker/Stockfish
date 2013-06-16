@@ -91,7 +91,7 @@ namespace {
   CountermovesStats Countermoves;
 
   template <NodeType NT>
-  Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth);
+  Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, bool cutNode);
 
   template <NodeType NT, bool InCheck>
   Value qsearch(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth);
@@ -295,14 +295,14 @@ namespace {
 
   void id_loop(Position& pos) {
 
-    Stack ss[MAX_PLY_PLUS_2];
+    Stack stack[MAX_PLY_PLUS_2], *ss = stack+1; // To allow referencing (ss-1)
     int depth, prevBestMoveChanges;
     Value bestValue, alpha, beta, delta;
 
-    memset(ss, 0, 4 * sizeof(Stack));
+    memset(ss-1, 0, 4 * sizeof(Stack));
     depth = BestMoveChanges = 0;
     bestValue = delta = -VALUE_INFINITE;
-    ss->currentMove = MOVE_NULL; // Hack to skip update gains
+    (ss-1)->currentMove = MOVE_NULL; // Hack to skip update gains
     TT.new_search();
     History.clear();
     Gains.clear();
@@ -349,9 +349,7 @@ namespace {
             // research with bigger window until not failing high/low anymore.
             while (true)
             {
-                // Search starts from ss+1 to allow referencing (ss-1). This is
-                // needed by update gains and ss copy when splitting at Root.
-                bestValue = search<Root>(pos, ss+1, alpha, beta, depth * ONE_PLY);
+                bestValue = search<Root>(pos, ss, alpha, beta, depth * ONE_PLY, false);
 
                 // Bring to front the best move. It is critical that sorting is
                 // done with a stable algorithm because all the values but the first
@@ -416,8 +414,12 @@ namespace {
 
         if (Options["Use Search Log"])
         {
+            RootMove& rm = RootMoves[0];
+            if (skill.best != MOVE_NONE)
+                rm = *std::find(RootMoves.begin(), RootMoves.end(), skill.best);
+
             Log log(Options["Search Log Filename"]);
-            log << pretty_pv(pos, depth, bestValue, Time::now() - SearchTime, &RootMoves[0].pv[0])
+            log << pretty_pv(pos, depth, rm.score, Time::now() - SearchTime, &rm.pv[0])
                 << std::endl;
         }
 
@@ -451,11 +453,11 @@ namespace {
                     || Time::now() - SearchTime > (TimeMgr.available_time() * 20) / 100))
             {
                 Value rBeta = bestValue - 2 * PawnValueMg;
-                (ss+1)->excludedMove = RootMoves[0].pv[0];
-                (ss+1)->skipNullMove = true;
-                Value v = search<NonPV>(pos, ss+1, rBeta - 1, rBeta, (depth - 3) * ONE_PLY);
-                (ss+1)->skipNullMove = false;
-                (ss+1)->excludedMove = MOVE_NONE;
+                ss->excludedMove = RootMoves[0].pv[0];
+                ss->skipNullMove = true;
+                Value v = search<NonPV>(pos, ss, rBeta - 1, rBeta, (depth - 3) * ONE_PLY, true);
+                ss->skipNullMove = false;
+                ss->excludedMove = MOVE_NONE;
 
                 if (v < rBeta)
                     stop = true;
@@ -483,7 +485,7 @@ namespace {
   // here: This is taken care of after we return from the split point.
 
   template <NodeType NT>
-  Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth) {
+  Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, bool cutNode) {
 
     const bool PvNode   = (NT == PV || NT == Root || NT == SplitPointPV || NT == SplitPointRoot);
     const bool SpNode   = (NT == SplitPointPV || NT == SplitPointNonPV || NT == SplitPointRoot);
@@ -677,7 +679,7 @@ namespace {
         pos.do_null_move(st);
         (ss+1)->skipNullMove = true;
         nullValue = depth-R < ONE_PLY ? -qsearch<NonPV, false>(pos, ss+1, -beta, -alpha, DEPTH_ZERO)
-                                      : - search<NonPV>(pos, ss+1, -beta, -alpha, depth-R);
+                                      : - search<NonPV>(pos, ss+1, -beta, -alpha, depth-R, !cutNode);
         (ss+1)->skipNullMove = false;
         pos.undo_null_move();
 
@@ -692,7 +694,7 @@ namespace {
 
             // Do verification search at high depths
             ss->skipNullMove = true;
-            Value v = search<NonPV>(pos, ss, alpha, beta, depth-R);
+            Value v = search<NonPV>(pos, ss, alpha, beta, depth-R, false);
             ss->skipNullMove = false;
 
             if (v >= beta)
@@ -712,7 +714,7 @@ namespace {
                 && (ss-1)->reduction
                 && threatMove != MOVE_NONE
                 && allows(pos, (ss-1)->currentMove, threatMove))
-                return beta - 1;
+                return alpha;
         }
     }
 
@@ -742,7 +744,7 @@ namespace {
             {
                 ss->currentMove = move;
                 pos.do_move(move, st, ci, pos.move_gives_check(move, ci));
-                value = -search<NonPV>(pos, ss+1, -rbeta, -rbeta+1, rdepth);
+                value = -search<NonPV>(pos, ss+1, -rbeta, -rbeta+1, rdepth, !cutNode);
                 pos.undo_move(move);
                 if (value >= rbeta)
                     return value;
@@ -757,7 +759,7 @@ namespace {
         Depth d = depth - 2 * ONE_PLY - (PvNode ? DEPTH_ZERO : depth / 4);
 
         ss->skipNullMove = true;
-        search<PvNode ? PV : NonPV>(pos, ss, alpha, beta, d);
+        search<PvNode ? PV : NonPV>(pos, ss, alpha, beta, d, true);
         ss->skipNullMove = false;
 
         tte = TT.probe(posKey);
@@ -853,7 +855,7 @@ split_point_start: // At split points actual search starts from here
           Value rBeta = ttValue - int(depth);
           ss->excludedMove = move;
           ss->skipNullMove = true;
-          value = search<NonPV>(pos, ss, rBeta - 1, rBeta, depth / 2);
+          value = search<NonPV>(pos, ss, rBeta - 1, rBeta, depth / 2, cutNode);
           ss->skipNullMove = false;
           ss->excludedMove = MOVE_NONE;
 
@@ -946,6 +948,10 @@ split_point_start: // At split points actual search starts from here
           &&  move != ss->killers[1])
       {
           ss->reduction = reduction<PvNode>(depth, moveCount);
+
+          if (!PvNode && cutNode)
+              ss->reduction += ONE_PLY;
+
           if (move == countermoves[0] || move == countermoves[1])
               ss->reduction = std::max(DEPTH_ZERO, ss->reduction-ONE_PLY);
 
@@ -953,7 +959,7 @@ split_point_start: // At split points actual search starts from here
           if (SpNode)
               alpha = splitPoint->alpha;
 
-          value = -search<NonPV>(pos, ss+1, -(alpha+1), -alpha, d);
+          value = -search<NonPV>(pos, ss+1, -(alpha+1), -alpha, d, true);
 
           doFullDepthSearch = (value > alpha && ss->reduction != DEPTH_ZERO);
           ss->reduction = DEPTH_ZERO;
@@ -970,7 +976,7 @@ split_point_start: // At split points actual search starts from here
           value = newDepth < ONE_PLY ?
                           givesCheck ? -qsearch<NonPV,  true>(pos, ss+1, -(alpha+1), -alpha, DEPTH_ZERO)
                                      : -qsearch<NonPV, false>(pos, ss+1, -(alpha+1), -alpha, DEPTH_ZERO)
-                                     : - search<NonPV>(pos, ss+1, -(alpha+1), -alpha, newDepth);
+                                     : - search<NonPV>(pos, ss+1, -(alpha+1), -alpha, newDepth, !cutNode);
       }
 
       // Only for PV nodes do a full PV search on the first move or after a fail
@@ -980,7 +986,7 @@ split_point_start: // At split points actual search starts from here
           value = newDepth < ONE_PLY ?
                           givesCheck ? -qsearch<PV,  true>(pos, ss+1, -beta, -alpha, DEPTH_ZERO)
                                      : -qsearch<PV, false>(pos, ss+1, -beta, -alpha, DEPTH_ZERO)
-                                     : - search<PV>(pos, ss+1, -beta, -alpha, newDepth);
+                                     : - search<PV>(pos, ss+1, -beta, -alpha, newDepth, false);
       // Step 17. Undo move
       pos.undo_move(move);
 
@@ -1055,7 +1061,7 @@ split_point_start: // At split points actual search starts from here
           assert(bestValue < beta);
 
           thisThread->split<FakeSplit>(pos, ss, alpha, beta, &bestValue, &bestMove,
-                                       depth, threatMove, moveCount, &mp, NT);
+                                       depth, threatMove, moveCount, &mp, NT, cutNode);
           if (bestValue >= beta)
               break;
       }
@@ -1463,15 +1469,15 @@ split_point_start: // At split points actual search starts from here
     {
         // Update occupancy as if the piece and the threat are moving
         Bitboard occ = pos.pieces() ^ m1from ^ m1to ^ m2from;
-        Piece piece = pos.piece_on(m1from);
+        Piece pc = pos.piece_on(m1from);
 
         // The moved piece attacks the square 'tto' ?
-        if (pos.attacks_from(piece, m1to, occ) & m2to)
+        if (pos.attacks_from(pc, m1to, occ) & m2to)
             return true;
 
         // Scan for possible X-ray attackers behind the moved piece
-        Bitboard xray =  (attacks_bb<  ROOK>(m2to, occ) & pos.pieces(color_of(piece), QUEEN, ROOK))
-                       | (attacks_bb<BISHOP>(m2to, occ) & pos.pieces(color_of(piece), QUEEN, BISHOP));
+        Bitboard xray =  (attacks_bb<  ROOK>(m2to, occ) & pos.pieces(color_of(pc), QUEEN, ROOK))
+                       | (attacks_bb<BISHOP>(m2to, occ) & pos.pieces(color_of(pc), QUEEN, BISHOP));
 
         // Verify attackers are triggered by our move and not already existing
         if (xray && (xray ^ (xray & pos.attacks_from<QUEEN>(m2to))))
@@ -1535,7 +1541,7 @@ split_point_start: // At split points actual search starts from here
   string uci_pv(const Position& pos, int depth, Value alpha, Value beta) {
 
     std::stringstream s;
-    Time::point elaspsed = Time::now() - SearchTime + 1;
+    Time::point elapsed = Time::now() - SearchTime + 1;
     size_t uciPVSize = std::min((size_t)Options["MultiPV"], RootMoves.size());
     int selDepth = 0;
 
@@ -1560,8 +1566,8 @@ split_point_start: // At split points actual search starts from here
           << " seldepth "  << selDepth
           << " score "     << (i == PVIdx ? score_to_uci(v, alpha, beta) : score_to_uci(v))
           << " nodes "     << pos.nodes_searched()
-          << " nps "       << pos.nodes_searched() * 1000 / elaspsed
-          << " time "      << elaspsed
+          << " nps "       << pos.nodes_searched() * 1000 / elapsed
+          << " time "      << elapsed
           << " multipv "   << i + 1
           << " pv";
 
@@ -1689,11 +1695,11 @@ void Thread::idle_loop() {
 
           Threads.mutex.unlock();
 
-          Stack ss[MAX_PLY_PLUS_2];
+          Stack stack[MAX_PLY_PLUS_2], *ss = stack+1; // To allow referencing (ss-1)
           Position pos(*sp->pos, this);
 
-          memcpy(ss, sp->ss - 1, 4 * sizeof(Stack));
-          (ss+1)->splitPoint = sp;
+          memcpy(ss-1, sp->ss-1, 4 * sizeof(Stack));
+          ss->splitPoint = sp;
 
           sp->mutex.lock();
 
@@ -1703,13 +1709,13 @@ void Thread::idle_loop() {
 
           switch (sp->nodeType) {
           case Root:
-              search<SplitPointRoot>(pos, ss+1, sp->alpha, sp->beta, sp->depth);
+              search<SplitPointRoot>(pos, ss, sp->alpha, sp->beta, sp->depth, sp->cutNode);
               break;
           case PV:
-              search<SplitPointPV>(pos, ss+1, sp->alpha, sp->beta, sp->depth);
+              search<SplitPointPV>(pos, ss, sp->alpha, sp->beta, sp->depth, sp->cutNode);
               break;
           case NonPV:
-              search<SplitPointNonPV>(pos, ss+1, sp->alpha, sp->beta, sp->depth);
+              search<SplitPointNonPV>(pos, ss, sp->alpha, sp->beta, sp->depth, sp->cutNode);
               break;
           default:
               assert(false);
