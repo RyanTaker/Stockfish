@@ -112,9 +112,9 @@ namespace {
      {}, {},
      { S(-35,-30), S(-22,-20), S(-9,-10), S( 3,  0), S(15, 10), S(27, 20), // Knights
        S( 37, 28), S( 42, 31), S(44, 33) },
-     { S(-22,-27), S( -8,-13), S( 6,  1), S(20, 15), S(34, 29), S(48, 43), // Bishops
-       S( 60, 55), S( 68, 63), S(74, 68), S(77, 72), S(80, 75), S(82, 77),
-       S( 84, 79), S( 86, 81), S(87, 82), S(87, 82) },
+     { S(-22,-27), S(  6,  0), S(23, 16), S(34, 28), S(43, 37), S(51, 44), // Bishops
+       S( 57, 50), S( 63, 56), S(68, 60), S(72, 65), S(76, 68), S(79, 72), // Note Evaled by log e(n+1)
+       S( 83, 75), S( 86, 78), S(89, 83), S(91, 86) },                     // with vars(-22 & 41, -27 & 40)
      { S(-17,-33), S(-11,-16), S(-5,  0), S( 1, 16), S( 7, 32), S(13, 48), // Rooks
        S( 18, 64), S( 22, 80), S(26, 96), S(29,109), S(31,115), S(33,119),
        S( 35,122), S( 36,123), S(37,124), S(38,124) },
@@ -126,24 +126,16 @@ namespace {
        S( 25, 41), S( 25, 41) }
   };
 
-  // Outpost[PieceType][Square] contains bonuses of knights and bishops, indexed
+  // Outpost[Square] contains bonuses of knights, indexed
   // by piece type and square (from white's point of view).
-  const Value Outpost[][SQUARE_NB] = {
-  {
+  const Value Outpost[SQUARE_NB] = {
   //  A     B     C     D     E     F     G     H
     V(0), V(0), V(0), V(0), V(0), V(0), V(0), V(0), // Knights
     V(0), V(0), V(0), V(0), V(0), V(0), V(0), V(0),
     V(0), V(0), V(4), V(8), V(8), V(4), V(0), V(0),
     V(0), V(4),V(17),V(26),V(26),V(17), V(4), V(0),
     V(0), V(8),V(26),V(35),V(35),V(26), V(8), V(0),
-    V(0), V(4),V(17),V(17),V(17),V(17), V(4), V(0) },
-  {
-    V(0), V(0), V(0), V(0), V(0), V(0), V(0), V(0), // Bishops
-    V(0), V(0), V(0), V(0), V(0), V(0), V(0), V(0),
-    V(0), V(0), V(5), V(5), V(5), V(5), V(0), V(0),
-    V(0), V(5),V(10),V(10),V(10),V(10), V(5), V(0),
-    V(0),V(10),V(21),V(21),V(21),V(21),V(10), V(0),
-    V(0), V(5), V(8), V(8), V(8), V(8), V(5), V(0) }
+    V(0), V(4),V(17),V(17),V(17),V(17), V(4), V(0) 
   };
 
   // Threat[attacking][attacked] contains bonuses according to which piece
@@ -449,17 +441,14 @@ Value do_evaluate(const Position& pos, Value& margin) {
   }
 
 
-  // evaluate_outposts() evaluates bishop and knight outposts squares
+  // evaluate_outposts() evaluates knight outposts squares
 
-  template<PieceType Piece, Color Us>
+  template<Color Us>
   Score evaluate_outposts(const Position& pos, EvalInfo& ei, Square s) {
-
     const Color Them = (Us == WHITE ? BLACK : WHITE);
 
-    assert (Piece == BISHOP || Piece == KNIGHT);
-
     // Initial bonus based on square
-    Value bonus = Outpost[Piece == BISHOP][relative_square(Us, s)];
+    Value bonus = Outpost[relative_square(Us, s)];
 
     // Increase bonus if supported by pawn, especially if the opponent has
     // no minor piece which can exchange the outpost piece.
@@ -508,6 +497,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
         }
 
         int mob = popcount<Piece == QUEEN ? Full : Max15>(b & mobilityArea);
+
         mobility += MobilityBonus[Piece][mob];
 
         // Decrease score if we are attacked by an enemy pawn. Remaining part
@@ -526,10 +516,10 @@ Value do_evaluate(const Position& pos, Value& margin) {
         if (Piece == BISHOP)
             score -= BishopPawns * ei.pi->pawns_on_same_color_squares(Us, s);
 
-        // Bishop and knight outposts squares
-        if (    (Piece == BISHOP || Piece == KNIGHT)
+        // Knight outposts squares
+        if (Piece == KNIGHT
             && !(pos.pieces(Them, PAWN) & attack_span_mask(Us, s)))
-            score += evaluate_outposts<Piece, Us>(pos, ei, s);
+            score += evaluate_outposts<Us>(pos, ei, s);
 
         if (  (Piece == ROOK || Piece == QUEEN)
             && relative_rank(Us, s) >= RANK_5)
