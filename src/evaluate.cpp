@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
+#include <iostream>
 
 #include "bitcount.h"
 #include "evaluate.h"
@@ -284,16 +285,16 @@ namespace Eval {
     }
     
     for(int i = 0; i < 8; i++)
-        MobilityBonus[KNIGHT][i] = make_score(calculate_mobility(-35, 44, 8, i), calculate_mobility(-30, 33, 8, i));
+        MobilityBonus[KNIGHT][i] = make_score(calculate_mobility(-63, 42, 8, i), calculate_mobility(-56, 43, 8, i));
   
     for(int i = 0; i < 13; i++)
-        MobilityBonus[BISHOP][i] = make_score(calculate_mobility(-22, 87, 13, i), calculate_mobility(-27, 82, 13, i));
+        MobilityBonus[BISHOP][i] = make_score(calculate_mobility(-71, 48, 13, i), calculate_mobility(-62, 77, 13, i));
       
     for(int i = 0; i < 14; i++)
-        MobilityBonus[ROOK][i] = make_score(calculate_mobility(-17, 38, 14, i), calculate_mobility(-33, 124, 14, i));
+        MobilityBonus[ROOK][i] = make_score(calculate_mobility(-51, 33, 14, i), calculate_mobility(-81, 84, 14, i));
     
     for(int i = 0; i < 32; i++)
-        MobilityBonus[QUEEN][i] = make_score(calculate_mobility(-12, 25, 32, i), calculate_mobility(-20, 41, 32, i));
+        MobilityBonus[QUEEN][i] = make_score(calculate_mobility(-17, 21, 32, i), calculate_mobility(-20, 41, 32, i));
   }
   
   int calculate_mobility(int min, int max, int count, int i) {
@@ -509,8 +510,23 @@ Value do_evaluate(const Position& pos, Value& margin) {
                 ei.kingAdjacentZoneAttacksCount[Us] += popcount<Max15>(bb);
         }
 
+        static std::map<PieceType, int> runs;
+        static std::map<PieceType, float> total;
+        static std::map<PieceType, std::string> name;
+        
+        name[KNIGHT] = "Knight";
+        name[BISHOP] = "Bishop";
+        name[ROOK]   = "Rook";
+        name[QUEEN]  = "Queen";
+
         int mob = popcount<Piece == QUEEN ? Full : Max15>(b & mobilityArea);
-        mobility += MobilityBonus[Piece][mob];
+        Score mobBonus = MobilityBonus[Piece][mob];
+        mobility += mobBonus;
+        runs[Piece] = runs[Piece] + 1;
+        total[Piece] = total[Piece] + interpolate(mobBonus, ei.mi->game_phase(), SCALE_FACTOR_NORMAL);
+        
+        if(runs[Piece] % 50000 == 0)
+            std::cout << name[Piece] << " " << total[Piece] / runs[Piece] << std::endl;
 
         // Decrease score if we are attacked by an enemy pawn. Remaining part
         // of threat evaluation must be done later when we have full attack info.
