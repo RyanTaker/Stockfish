@@ -465,11 +465,10 @@ Value do_evaluate(const Position& pos, Value& margin) {
     // no minor piece which can exchange the outpost piece.
     if (bonus && (ei.attackedBy[Us][PAWN] & s))
     {
-        if (   !pos.pieces(Them, KNIGHT)
-            && !(same_color_squares(s) & pos.pieces(Them, BISHOP)))
-            bonus += bonus + bonus / 2;
+        if (!pos.pieces(Them, KNIGHT))
+           bonus = (bonus * 3) / 2;
         else
-            bonus += bonus / 2;
+           bonus = (bonus * 5) / 2;
     }
     return make_score(bonus, bonus);
   }
