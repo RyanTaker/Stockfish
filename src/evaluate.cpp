@@ -562,7 +562,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
             if (   ((file_of(ksq) < FILE_E) == (file_of(s) < file_of(ksq)))
                 && (rank_of(ksq) == rank_of(s) || relative_rank(Us, ksq) == RANK_1)
                 && !ei.pi->semiopen_on_side(Us, file_of(ksq), file_of(ksq) < FILE_E))
-                score -= (TrappedRook - make_score(mob * 8, 0)) * (pos.can_castle(Us) ? 1 : 2);
+                score -= (TrappedRook - make_score(mob * 5, 0)) * (pos.can_castle(Us) ? 1 : 2);
         }
 
         // An important Chess960 pattern: A cornered bishop blocked by a friendly
