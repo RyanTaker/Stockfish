@@ -610,7 +610,6 @@ Value do_evaluate(const Position& pos, Value& margin) {
 
     // Enemy pieces not defended by a pawn and under our attack
     weakEnemies =  pos.pieces(Them)
-                 & ~ei.attackedBy[Them][PAWN]
                  & ei.attackedBy[Us][ALL_PIECES];
 
     // Add bonus according to type of attacked enemy piece and to the
@@ -621,9 +620,18 @@ Value do_evaluate(const Position& pos, Value& margin) {
         {
             b = ei.attackedBy[Us][pt1] & weakEnemies;
             if (b)
-                for (PieceType pt2 = PAWN; pt2 < KING; pt2++)
-                    if (b & pos.pieces(pt2))
-                        score += Threat[pt1][pt2];
+                for (PieceType pt2 = PAWN; pt2 < KING; pt2++) {
+                    Bitboard atkWeak = b & pos.pieces(pt2);
+                    
+                    if (atkWeak) {
+                        if(atkWeak & ~ei.attackedBy[Them][PAWN])
+                          score += Threat[pt1][pt2];
+                        else {
+                          Score initScore = Threat[pt1][pt2];
+                          score += make_score(mg_value(initScore) / 4, eg_value(initScore) / 4);
+                        }
+                    }
+                }
         }
 
     if (Trace)
