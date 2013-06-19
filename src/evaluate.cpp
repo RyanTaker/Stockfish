@@ -28,6 +28,7 @@
 #include "pawns.h"
 #include "thread.h"
 #include "ucioption.h"
+#include "math.h"
 
 namespace {
 
@@ -108,23 +109,7 @@ namespace {
   // MobilityBonus[PieceType][attacked] contains bonuses for middle and end
   // game, indexed by piece type and number of attacked squares not occupied by
   // friendly pieces.
-  const Score MobilityBonus[][32] = {
-     {}, {},
-     { S(-35,-30), S(-22,-20), S(-9,-10), S( 3,  0), S(15, 10), S(27, 20), // Knights
-       S( 37, 28), S( 42, 31), S(44, 33) },
-     { S(-22,-27), S( -8,-13), S( 6,  1), S(20, 15), S(34, 29), S(48, 43), // Bishops
-       S( 60, 55), S( 68, 63), S(74, 68), S(77, 72), S(80, 75), S(82, 77),
-       S( 84, 79), S( 86, 81), S(87, 82), S(87, 82) },
-     { S(-17,-33), S(-11,-16), S(-5,  0), S( 1, 16), S( 7, 32), S(13, 48), // Rooks
-       S( 18, 64), S( 22, 80), S(26, 96), S(29,109), S(31,115), S(33,119),
-       S( 35,122), S( 36,123), S(37,124), S(38,124) },
-     { S(-12,-20), S( -8,-13), S(-5, -7), S(-2, -1), S( 1,  5), S( 4, 11), // Queens
-       S(  7, 17), S( 10, 23), S(13, 29), S(16, 34), S(18, 38), S(20, 40),
-       S( 22, 41), S( 23, 41), S(24, 41), S(25, 41), S(25, 41), S(25, 41),
-       S( 25, 41), S( 25, 41), S(25, 41), S(25, 41), S(25, 41), S(25, 41),
-       S( 25, 41), S( 25, 41), S(25, 41), S(25, 41), S(25, 41), S(25, 41),
-       S( 25, 41), S( 25, 41) }
-  };
+  Score MobilityBonus[PIECE_TYPE_NB][32];
 
   // Outpost[PieceType][Square] contains bonuses of knights and bishops, indexed
   // by piece type and square (from white's point of view).
@@ -297,6 +282,23 @@ namespace Eval {
         KingDanger[1][i] = apply_weight(make_score(t, 0), Weights[KingDangerUs]);
         KingDanger[0][i] = apply_weight(make_score(t, 0), Weights[KingDangerThem]);
     }
+    
+    for(int i = 0; i < 8; i++)
+        MobilityBonus[KNIGHT][i] = make_score(calculate_mobility(-35, 44, 8, i), calculate_mobility(-30, 33, 8, i));
+  
+    for(int i = 0; i < 13; i++)
+        MobilityBonus[BISHOP][i] = make_score(calculate_mobility(-22, 87, 13, i), calculate_mobility(-27, 82, 13, i));
+      
+    for(int i = 0; i < 14; i++)
+        MobilityBonus[ROOK][i] = make_score(calculate_mobility(-17, 38, 14, i), calculate_mobility(-33, 124, 14, i));
+    
+    for(int i = 0; i < 32; i++)
+        MobilityBonus[QUEEN][i] = make_score(calculate_mobility(-12, 25, 32, i), calculate_mobility(-20, 41, 32, i));
+  }
+  
+  int calculate_mobility(int min, int max, int count, int i) {
+    double coeff = (max - min) / log(count);
+    return (int)(min + coeff * log(i + 1));
   }
 
 } // namespace Eval

@@ -27,6 +27,8 @@ class Position;
 namespace Eval {
 
 extern void init();
+extern int calculate_mobility(int min, int max, int count, int i);
+
 extern Value evaluate(const Position& pos, Value& margin);
 extern std::string trace(const Position& pos);
 
