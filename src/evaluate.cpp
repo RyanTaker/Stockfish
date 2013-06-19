@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
+#include <iostream>
 
 #include "bitcount.h"
 #include "evaluate.h"
@@ -508,9 +509,24 @@ Value do_evaluate(const Position& pos, Value& margin) {
             if (bb)
                 ei.kingAdjacentZoneAttacksCount[Us] += popcount<Max15>(bb);
         }
+        
+        static std::map<PieceType, int> runs;
+        static std::map<PieceType, float> total;
+        static std::map<PieceType, std::string> name;
+        
+        name[KNIGHT] = "Knight";
+        name[BISHOP] = "Bishop";
+        name[ROOK]   = "Rook";
+        name[QUEEN]  = "Queen";
 
         int mob = popcount<Piece == QUEEN ? Full : Max15>(b & mobilityArea);
-        mobility += MobilityBonus[Piece][mob];
+        Score mobBonus = MobilityBonus[Piece][mob];
+        mobility += mobBonus;
+        runs[Piece] = runs[Piece] + 1;
+        total[Piece] = total[Piece] + interpolate(mobBonus, ei.mi->game_phase(), SCALE_FACTOR_NORMAL);
+        
+        if(runs[Piece] % 50000 == 0)
+            std::cout << name[Piece] << " " << runs[Piece] / total[Piece] << std::endl;
 
         // Decrease score if we are attacked by an enemy pawn. Remaining part
         // of threat evaluation must be done later when we have full attack info.
