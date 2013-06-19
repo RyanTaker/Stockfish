@@ -533,8 +533,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
             && !(pos.pieces(Them, PAWN) & attack_span_mask(Us, s)))
             score += evaluate_outposts<Piece, Us>(pos, ei, s);
 
-        if (  (Piece == ROOK || Piece == QUEEN)
-            && relative_rank(Us, s) >= RANK_5)
+        if (Piece == ROOK || Piece == QUEEN)
         {
             // Major piece on 7th rank and enemy king trapped on 8th
             if (   relative_rank(Us, s) == RANK_7
