@@ -756,12 +756,6 @@ Value do_evaluate(const Position& pos, Value& margin) {
         if (b)
             attackUnits += KnightCheck * popcount<Max15>(b);
 
-        Bitboard pawnAttacks = pos.attacks_from<KING>(ksq) & ei.attackedBy[Them][PAWN];
-        if(more_than_one(pawnAttacks))
-          attackUnits *= 2;
-        else if(pawnAttacks)
-          attackUnits = (attackUnits * 3) / 2;
-
         // To index KingDanger[] attackUnits must be in [0, 99] range
         attackUnits = std::min(99, std::max(0, attackUnits));
 
