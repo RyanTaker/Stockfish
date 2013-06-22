@@ -440,8 +440,8 @@ Value do_evaluate(const Position& pos, Value& margin) {
     ei.attackedBy[Us][PAWN] = ei.pi->pawn_attacks(Us);
 
     // Init king safety tables only if we are going to use them
-    if ((pos.count<QUEEN>(Us) || (pos.count<ROOK>(Us) > 1 && pos.count<BISHOP>(Us)))
-       && pos.non_pawn_material(Us) > QueenValueMg + PawnValueMg)
+    if ((pos.count<QUEEN>(Us) && pos.non_pawn_material(Us) > QueenValueMg + PawnValueMg) ||
+       (pos.count<ROOK>(Us) && pos.count<BISHOP>(Us) && ei.attackedBy[Us][PAWN] & ei.attackedBy[Them][KING]))
     {
         ei.kingRing[Them] = b | shift_bb<Down>(b);
         b &= ei.attackedBy[Us][PAWN];
