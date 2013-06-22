@@ -440,7 +440,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
     ei.attackedBy[Us][PAWN] = ei.pi->pawn_attacks(Us);
 
     // Init king safety tables only if we are going to use them
-    if ((pos.count<QUEEN>(Us) || (b & ei.attackedBy[Us][PAWN])) && pos.non_pawn_material(Us) > QueenValueMg + PawnValueMg)
+    if ((pos.count<QUEEN>(Us) || (pos.count<ROOK>(Us) && pos.count<BISHOP>(Us))) && pos.non_pawn_material(Us) > QueenValueMg + PawnValueMg)
     {
         ei.kingRing[Them] = b | shift_bb<Down>(b);
         b &= ei.attackedBy[Us][PAWN];
@@ -758,9 +758,9 @@ Value do_evaluate(const Position& pos, Value& margin) {
 
         Bitboard pawnAttacks = pos.attacks_from<KING>(ksq) & ei.attackedBy[Them][PAWN];
         if(more_than_one(pawnAttacks))
-          attackUnits *= 5;
+          attackUnits *= 2;
         else if(pawnAttacks)
-          attackUnits = attackUnits * 2;
+          attackUnits = (attackUnits * 3) / 2;
 
         // To index KingDanger[] attackUnits must be in [0, 99] range
         attackUnits = std::min(99, std::max(0, attackUnits));
