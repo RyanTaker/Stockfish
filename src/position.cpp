@@ -150,8 +150,8 @@ void Position::init() {
 
       for (Square s = SQ_A1; s <= SQ_H8; s++)
       {
-         psq[WHITE][pt][ s] =  (v + PSQT[pt][s]);
-         psq[BLACK][pt][~s] = -(v + PSQT[pt][s]);
+         psq[WHITE][pt][ s] =  (v + (pt == QUEEN ? SCORE_ZERO : PSQT[pt][s]));
+         psq[BLACK][pt][~s] = -(v + (pt == QUEEN ? SCORE_ZERO : PSQT[pt][s]));
       }
   }
 }
