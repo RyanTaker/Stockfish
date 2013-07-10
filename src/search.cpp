@@ -512,7 +512,7 @@ namespace {
 
         assert(splitPoint->bestValue > -VALUE_INFINITE && splitPoint->moveCount > 0);
 
-        goto split_point_start;
+        goto moves_loop;
     }
 
     bestValue = -VALUE_INFINITE;
@@ -581,7 +581,10 @@ namespace {
 
     // Step 5. Evaluate the position statically and update parent's gain statistics
     if (inCheck)
+    {
         ss->staticEval = ss->evalMargin = eval = VALUE_NONE;
+        goto moves_loop;
+    }
 
     else if (tte)
     {
@@ -618,7 +621,6 @@ namespace {
     // Step 6. Razoring (is omitted in PV nodes)
     if (   !PvNode
         &&  depth < 4 * ONE_PLY
-        && !inCheck
         &&  eval + razor_margin(depth) < beta
         &&  ttMove == MOVE_NONE
         &&  abs(beta) < VALUE_MATE_IN_MAX_PLY
@@ -638,7 +640,6 @@ namespace {
     if (   !PvNode
         && !ss->skipNullMove
         &&  depth < 4 * ONE_PLY
-        && !inCheck
         &&  eval - futility_margin(depth, (ss-1)->futilityMoveCount) >= beta
         &&  abs(beta) < VALUE_MATE_IN_MAX_PLY
         &&  abs(eval) < VALUE_KNOWN_WIN
@@ -649,7 +650,6 @@ namespace {
     if (   !PvNode
         && !ss->skipNullMove
         &&  depth > ONE_PLY
-        && !inCheck
         &&  eval >= beta
         &&  abs(beta) < VALUE_MATE_IN_MAX_PLY
         &&  pos.non_pawn_material(pos.side_to_move()))
@@ -711,7 +711,6 @@ namespace {
     // prune the previous move.
     if (   !PvNode
         &&  depth >= 5 * ONE_PLY
-        && !inCheck
         && !ss->skipNullMove
         &&  abs(beta) < VALUE_MATE_IN_MAX_PLY)
     {
@@ -740,7 +739,7 @@ namespace {
     // Step 10. Internal iterative deepening
     if (   depth >= (PvNode ? 5 * ONE_PLY : 8 * ONE_PLY)
         && ttMove == MOVE_NONE
-        && (PvNode || (!inCheck && ss->staticEval + Value(256) >= beta)))
+        && (PvNode || ss->staticEval + Value(256) >= beta))
     {
         Depth d = depth - 2 * ONE_PLY - (PvNode ? DEPTH_ZERO : depth / 4);
 
@@ -752,7 +751,7 @@ namespace {
         ttMove = tte ? tte->move() : MOVE_NONE;
     }
 
-split_point_start: // At split points actual search starts from here
+moves_loop: // When in check and at SpNode search starts from here
 
     Square prevMoveSq = to_sq((ss-1)->currentMove);
     Move countermoves[] = { Countermoves[pos.piece_on(prevMoveSq)][prevMoveSq].first,
