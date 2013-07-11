@@ -44,7 +44,7 @@ namespace {
     {  35,  271,  -4                    }, // Knight
     {   7,  105,   4,    7              }, // Bishop
     { -27,   -2,  46,   100,  -345      }, // Rook
-    {  58,   29,  83,   148,  -112, -25 }  // Queen
+    {  58,   29,  83,   148,  -472, -25 }  // Queen
   };
 
   const int QuadraticCoefficientsOppositeColor[][PIECE_TYPE_NB] = {
@@ -106,16 +106,17 @@ namespace {
     for (pt1 = NO_PIECE_TYPE; pt1 <= QUEEN; pt1++)
     {
         pc = pieceCount[Us][pt1];
-        if (!pc)
-            continue;
 
-        v = LinearCoefficients[pt1];
-
-        for (pt2 = NO_PIECE_TYPE; pt2 <= pt1; pt2++)
-            v +=  QuadraticCoefficientsSameColor[pt1][pt2] * pieceCount[Us][pt2]
-                + QuadraticCoefficientsOppositeColor[pt1][pt2] * pieceCount[Them][pt2];
-
-        value += pc * v;
+        if (pc)
+        {
+            v = LinearCoefficients[pt1];
+    
+            for (pt2 = NO_PIECE_TYPE; pt2 <= pt1; pt2++)
+                v +=  QuadraticCoefficientsSameColor[pt1][pt2] * pieceCount[Us][pt2]
+                    + QuadraticCoefficientsOppositeColor[pt1][pt2] * pieceCount[Them][pt2];
+    
+            value += pc * v;
+        }
     }
     return value;
   }
