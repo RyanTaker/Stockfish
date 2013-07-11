@@ -1354,6 +1354,7 @@ moves_loop: // When in check and at SpNode search starts from here
     Bitboard enemies = pos.pieces(them);
     Bitboard kingAtt = pos.attacks_from<KING>(ksq);
     Bitboard occ = pos.pieces() ^ from ^ ksq;
+    Bitboard oldAtt = pos.attacks_from(pc, from, occ);
     Bitboard newAtt = pos.attacks_from(pc, to, occ);
 
     // Checks which give opponent's king at most one escape square are dangerous
@@ -1365,12 +1366,15 @@ moves_loop: // When in check and at SpNode search starts from here
         return true;
 
     // Creating new double threats with checks is dangerous
-    Bitboard b = (enemies ^ ksq) & newAtt;
-    while (b)
+    Bitboard b = (enemies ^ ksq) & newAtt & ~oldAtt;
+    if(more_than_one(b))
     {
-        // Note that here we generate illegal "double move"!
-        if (futilityBase + PieceValue[EG][pos.piece_on(pop_lsb(&b))] >= beta)
-            return true;
+        while (b)
+        {
+            // Note that here we generate illegal "double move"!
+            if (futilityBase + PieceValue[EG][pos.piece_on(pop_lsb(&b))] >= beta)
+                return true;
+        }
     }
 
     return false;
