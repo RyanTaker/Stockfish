@@ -34,21 +34,17 @@ namespace {
   // Scale factors used when one side has no more pawns
   const int NoPawnsSF[4] = { 6, 12, 32 };
 
-  // Polynomial material balance parameters
-  const Value RedundantQueen = Value(320);
-  const Value RedundantRook  = Value(554);
-
   //                                  pair  pawn knight bishop rook queen
-  const int LinearCoefficients[6] = { 1617, -162, -1172, -190,  105,  26 };
+  const int LinearCoefficients[6] = { 100,  -50,    0,      0,   0,    0 };
 
   const int QuadraticCoefficientsSameColor[][PIECE_TYPE_NB] = {
     // pair pawn knight bishop rook queen
-    {   7                               }, // Bishop pair
+    {   0                               }, // Bishop pair
     {  39,    2                         }, // Pawn
-    {  35,  271,  -4                    }, // Knight
-    {   7,  105,   4,    7              }, // Bishop
-    { -27,   -2,  46,   100,   56       }, // Rook
-    {  58,   29,  83,   148,   -3,  -25 }  // Queen
+    {  35,  183,  -4                    }, // Knight
+    {   0,  105,   4,    0              }, // Bishop
+    { -52,   75,  46,   100,   56       }, // Rook
+    { -20,   29,  83,   148,  -20,  -55 }  // Queen
   };
 
   const int QuadraticCoefficientsOppositeColor[][PIECE_TYPE_NB] = {
@@ -59,7 +55,7 @@ namespace {
     {  10,   62,  41                    }, // Knight      OUR PIECES
     {  57,   64,  39,    41             }, // Bishop
     {  50,   40,  23,   -22,   41       }, // Rook
-    { 106,  101,   3,   151,  171,   41 }  // Queen
+    {  62,   31,   3,   151,  171,   41 }  // Queen
   };
 
   // Endgame evaluation and scaling functions accessed direcly and not through
@@ -105,12 +101,6 @@ namespace {
 
     int pt1, pt2, pc, v;
     int value = 0;
-
-    // Redundancy of major pieces, formula based on Kaufman's paper
-    // "The Evaluation of Material Imbalances in Chess"
-    if (pieceCount[Us][ROOK] > 0)
-        value -=  RedundantRook * (pieceCount[Us][ROOK] - 1)
-                + RedundantQueen * pieceCount[Us][QUEEN];
 
     // Second-degree polynomial material imbalance by Tord Romstad
     for (pt1 = NO_PIECE_TYPE; pt1 <= QUEEN; pt1++)
