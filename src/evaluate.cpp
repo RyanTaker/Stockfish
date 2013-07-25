@@ -466,7 +466,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
     // Increase bonus if supported by pawn or knight by knight, especially if
     // the opponent has no minor piece which can exchange the outpost piece.
     if (bonus)
-    {
+    {         
         if (ei.attackedBy[Us][PAWN] & s)
         {
             if (   !pos.pieces(Them, KNIGHT)
@@ -474,8 +474,10 @@ Value do_evaluate(const Position& pos, Value& margin) {
                 bonus += bonus + bonus / 2;
             else
                 bonus += bonus / 2;
-        } else if (Piece == KNIGHT && (ei.attackedBy[Us][KNIGHT] & s))
-            bonus += bonus / 2;
+        }
+        
+        if (Piece == KNIGHT && (ei.attackedBy[Us][KNIGHT] & s))
+           bonus += (bonus * 2) / 3;
     }
     return make_score(bonus, bonus);
   }
