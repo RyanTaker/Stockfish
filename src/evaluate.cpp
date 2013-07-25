@@ -463,14 +463,18 @@ Value do_evaluate(const Position& pos, Value& margin) {
     // Initial bonus based on square
     Value bonus = Outpost[Piece == BISHOP][relative_square(Us, s)];
 
-    // Increase bonus if supported by pawn, especially if the opponent has
-    // no minor piece which can exchange the outpost piece.
-    if (bonus && (ei.attackedBy[Us][PAWN] & s))
+    // Increase bonus if supported by pawn or knight by knight, especially if
+    // the opponent has no minor piece which can exchange the outpost piece.
+    if (bonus)
     {
-        if (   !pos.pieces(Them, KNIGHT)
-            && !(same_color_squares(s) & pos.pieces(Them, BISHOP)))
-            bonus += bonus + bonus / 2;
-        else
+        if (ei.attackedBy[Us][PAWN] & s)
+        {
+            if (   !pos.pieces(Them, KNIGHT)
+                && !(same_color_squares(s) & pos.pieces(Them, BISHOP)))
+                bonus += bonus + bonus / 2;
+            else
+                bonus += bonus / 2;
+        } else if (Piece == KNIGHT && (ei.attackedBy[Us][KNIGHT] & s))
             bonus += bonus / 2;
     }
     return make_score(bonus, bonus);
