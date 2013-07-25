@@ -469,13 +469,12 @@ Value do_evaluate(const Position& pos, Value& margin) {
     {
         if (ei.attackedBy[Us][PAWN] & s)
         {
-            if (   !pos.pieces(Them, KNIGHT)
-                && !(same_color_squares(s) & pos.pieces(Them, BISHOP)))
+            if (   (Piece == KNIGHT && ei.attackedBy[Us][KNIGHT] & s) || (!pos.pieces(Them, KNIGHT)
+                && !(same_color_squares(s) & pos.pieces(Them, BISHOP))))
                 bonus += bonus + bonus / 2;
             else
                 bonus += bonus / 2;
-        } else if (Piece == KNIGHT && (ei.attackedBy[Us][KNIGHT] & s))
-            bonus += bonus / 2;
+        }
     }
     return make_score(bonus, bonus);
   }
