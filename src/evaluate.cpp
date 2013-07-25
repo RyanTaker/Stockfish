@@ -134,9 +134,9 @@ namespace {
     V(0), V(0), V(0), V(0), V(0), V(0), V(0), V(0), // Knights
     V(0), V(0), V(0), V(0), V(0), V(0), V(0), V(0),
     V(0), V(0), V(4), V(8), V(8), V(4), V(0), V(0),
-    V(0), V(4),V(17),V(26),V(26),V(17), V(4), V(0),
-    V(0), V(8),V(26),V(35),V(35),V(26), V(8), V(0),
-    V(0), V(4),V(17),V(17),V(17),V(17), V(4), V(0) },
+    V(0), V(4),V(27),V(36),V(36),V(27), V(4), V(0),
+    V(0), V(8),V(36),V(45),V(45),V(36), V(8), V(0),
+    V(0), V(4),V(27),V(27),V(27),V(27), V(4), V(0) },
   {
     V(0), V(0), V(0), V(0), V(0), V(0), V(0), V(0), // Bishops
     V(0), V(0), V(0), V(0), V(0), V(0), V(0), V(0),
@@ -767,7 +767,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
         // be very big, and so capturing a single attacking piece can therefore
         // result in a score change far bigger than the value of the captured piece.
         score -= KingDanger[Us == Search::RootColor][attackUnits];
-        margins[Us] += mg_value(KingDanger[Us == Search::RootColor][attackUnits]);
+        margins[Us] += mg_value(KingDanger[Us == Search::RootColor][attackUnits]) / 2;
     }
 
     if (Trace)
