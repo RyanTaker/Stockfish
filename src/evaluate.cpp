@@ -477,7 +477,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
         } else if (Piece == KNIGHT && (ei.attackedBy[Us][KNIGHT] & s))
             bonus += bonus / 2;
     }
-    return make_score(bonus, bonus);
+    return make_score(bonus, bonus / 3);
   }
 
 
