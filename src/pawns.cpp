@@ -32,10 +32,9 @@ namespace {
 
   // Doubled pawn penalty by opposed flag and file
   const Score Doubled[2][FILE_NB] = {
-  { S(13, 43), S(20, 48), S(23, 48), S(23, 48),
-    S(23, 48), S(23, 48), S(20, 48), S(13, 43) },
-  { S(13, 43), S(20, 48), S(23, 48), S(23, 48),
-    S(23, 48), S(23, 48), S(20, 48), S(13, 43) }};
+  //   A           B          C          D          E           F          G         H
+  { S(10, 43), S(13, 48), S(15, 48), S(23, 48), S(23, 48), S(15, 48), S(13, 48), S(10, 43) },
+  { S(10, 43), S(13, 48), S(15, 48), S(23, 48), S(23, 48), S(15, 48), S(13, 48), S(10, 43) }};
 
   // Isolated pawn penalty by opposed flag and file
   const Score Isolated[2][FILE_NB] = {
@@ -53,8 +52,8 @@ namespace {
 
   // Pawn chain membership bonus by file
   const Score ChainMember[FILE_NB] = {
-    S(11,-1), S(13,-1), S(13,-1), S(14,-1),
-    S(14,-1), S(13,-1), S(13,-1), S(11,-1)
+    //  A         B         C         D        E         F          G        H
+    S(13,-1), S(13,-1), S(13,-1), S(8,-1), S(8,-1), S(13,-1), S(13,-1), S(13,-1)
   };
 
   // Candidate passed pawn bonus by rank
