@@ -175,6 +175,7 @@ namespace {
   const Score BishopPawns      = make_score( 8, 12);
   const Score UndefendedMinor  = make_score(25, 10);
   const Score TrappedRook      = make_score(90,  0);
+  const Score BishopEnemies    = make_score(13,  8);
 
   // Penalty for a bishop on a1/h1 (a8/h8 for black) which is trapped by
   // a friendly pawn on b2/g2 (b7/g7 for black). This can obviously only
@@ -526,9 +527,20 @@ Value do_evaluate(const Position& pos, Value& margin) {
                  && !more_than_one(BetweenBB[s][pos.king_square(Them)] & pos.pieces()))
                  score += BishopPin;
 
-        // Penalty for bishop with same coloured pawns
-        if (Piece == BISHOP)
-            score -= BishopPawns * ei.pi->pawns_on_same_color_squares(Us, s);
+        if (Piece == BISHOP) {
+            score -= BishopPawns * ei.pi->pawns_on_same_color_squares(Us, s); // Penalty for bishop with same coloured pawns
+            
+            Bitboard enemies = DarkSquares;
+            
+            if(!(s & DarkSquares))
+                enemies = ~DarkSquares;
+                
+            enemies &= pos.pieces(Them);
+            enemies &= ~ei.attackedBy[Them][PAWN];
+            
+            if(enemies)
+                score += BishopEnemies * popcount<Max15>(enemies);
+        }
 
         // Bishop and knight outposts squares
         if (    (Piece == BISHOP || Piece == KNIGHT)
