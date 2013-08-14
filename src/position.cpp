@@ -299,7 +299,7 @@ void Position::set(const string& fenStr, bool isChess960, Thread* th) {
   if(!pos_is_ok()) sync_cout << "info string error bad FEN:" << fenStr << sync_endl;
   else sync_cout << "info string valid FEN"<<sync_endl;
 
-  assert(pos_is_ok());
+  //assert(pos_is_ok());
 }
 
 
