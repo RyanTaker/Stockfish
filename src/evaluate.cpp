@@ -456,7 +456,25 @@ Value do_evaluate(const Position& pos, Value& margin) {
   
   template<bool Trace>
   Score evaluate_mobility_from_points(Score white, Score black) {
-      return apply_weight(white - black, Weights[Mobility]);
+      int wmg = mg_value(white);
+      int bmg = mg_value(black);
+      
+      int better = std::max(wmg, bmg);
+      int worse = std::min(wmg, bmg);
+      
+      if(worse < 0) {
+          int under = std::abs(worse) * 2;
+          
+          better += under;
+          worse += under;
+      }
+      
+      worse += 1;
+      
+      int ticks_above = std::min(4, better / worse);
+      static Score tick_bonus = make_score(25, 25);
+      
+      return apply_weight(white - black, Weights[Mobility]) + (wmg > bmg ? tick_bonus : -tick_bonus) * ticks_above;
   }
 
 
