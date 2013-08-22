@@ -238,6 +238,9 @@ namespace {
   template<Color Us, bool Trace>
   Score evaluate_pieces_of_color(const Position& pos, EvalInfo& ei, Score& mobility);
 
+  template<bool Trace>
+  Score evaluate_mobility_from_points(Score white, Score black);
+
   template<Color Us, bool Trace>
   Score evaluate_king(const Position& pos, const EvalInfo& ei, Value margins[]);
 
@@ -350,7 +353,7 @@ Value do_evaluate(const Position& pos, Value& margin) {
   score +=  evaluate_pieces_of_color<WHITE, Trace>(pos, ei, mobilityWhite)
           - evaluate_pieces_of_color<BLACK, Trace>(pos, ei, mobilityBlack);
 
-  score += apply_weight(mobilityWhite - mobilityBlack, Weights[Mobility]);
+  score += evaluate_mobility_from_points<Trace>(mobilityWhite, mobilityBlack);
 
   // Evaluate kings after all other pieces because we need complete attack
   // information when computing the king safety evaluation.
@@ -449,6 +452,11 @@ Value do_evaluate(const Position& pos, Value& margin) {
         ei.kingAdjacentZoneAttacksCount[Us] = ei.kingAttackersWeight[Us] = 0;
     } else
         ei.kingRing[Them] = ei.kingAttackersCount[Us] = 0;
+  }
+  
+  template<bool Trace>
+  Score evaluate_mobility_from_points(Score white, Score black) {
+      return apply_weight(white - black, Weights[Mobility]);
   }
 
 
