@@ -153,8 +153,8 @@ void Search::init() {
   // Init futility move count array
   for (d = 0; d < 32; d++)
   {
-      FutilityMoveCounts[0][d] = int(3.001 + 0.3 * pow(double(d       ), 1.8)) * (d < 5 ? 4 : 3) / 4;
-      FutilityMoveCounts[1][d] = int(3.001 + 0.3 * pow(double(d + 0.98), 1.8));
+      FutilityMoveCounts[0][d] = int(3 + 0.3 * pow(double(d       ), 1.8)) * 3/4 + (2 < d && d < 5);
+      FutilityMoveCounts[1][d] = int(3 + 0.3 * pow(double(d + 0.98), 1.8));
   }
 }
 
@@ -1400,7 +1400,7 @@ moves_loop: // When in check and at SpNode search starts from here
     assert(is_ok(first));
     assert(is_ok(second));
     assert(color_of(pos.piece_on(from_sq(second))) == ~pos.side_to_move());
-    assert(color_of(pos.piece_on(to_sq(first))) == ~pos.side_to_move());
+    assert(type_of(first) == CASTLE || color_of(pos.piece_on(to_sq(first))) == ~pos.side_to_move());
 
     Square m1from = from_sq(first);
     Square m2from = from_sq(second);
