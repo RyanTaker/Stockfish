@@ -62,6 +62,9 @@ namespace {
     S( 0, 0), S( 6, 13), S(6,13), S(14,29),
     S(34,68), S(83,166), S(0, 0), S( 0, 0)
   };
+  
+  const Score OpposedDoubleIssolated = S(15, 17);
+  const Score FreeDoubleIssolated = S(7, 9);
 
   // Weakness of our pawn shelter in front of the king indexed by [rank]
   const Value ShelterWeakness[RANK_NB] =
@@ -175,6 +178,13 @@ namespace {
 
         if (doubled)
             value -= Doubled[opposed][f];
+            
+        if(doubled && isolated) {
+            if(opposed)
+                value -= OpposedDoubleIssolated;
+            else
+                value -= FreeDoubleIssolated;
+        }
 
         if (backward)
             value -= Backward[opposed][f];
