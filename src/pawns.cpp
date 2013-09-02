@@ -236,6 +236,13 @@ Value Entry::shelter_storm(const Position& pos, Square ksq) {
       rkThem = b ? relative_rank(Us, frontmost_sq(Them, b)) : RANK_1;
       safety -= StormDanger[rkUs == RANK_1 ? 0 : rkThem == rkUs + 1 ? 2 : 1][rkThem];
   }
+  
+  int s = ((int)safety) / 3;
+  int pawnDiff = popcount<Max15>(ourPawns) - popcount<Max15>(theirPawns);
+  
+  if(s > 0 && pawnDiff > 0) {
+      safety -= (Value)(s * pawnDiff);
+  }
 
   return safety;
 }
