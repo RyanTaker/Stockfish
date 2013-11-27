@@ -163,7 +163,7 @@ namespace {
         if (isolated)
             value -= Isolated[opposed][f];
 
-        if (doubled)
+        if (doubled && !passed)
             value -= Doubled[f];
 
         if (backward)
