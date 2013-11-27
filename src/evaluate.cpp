@@ -374,8 +374,7 @@ Value do_evaluate(const Position& pos) {
 
   // If we don't already have an unusual scale factor, check for opposite
   // colored bishop endgames, and use a lower scale for those.
-  if (   ei.mi->game_phase() < PHASE_MIDGAME
-      && pos.opposite_bishops()
+  if (   pos.opposite_bishops()
       && sf == SCALE_FACTOR_NORMAL)
   {
       // Only the two bishops ?
@@ -387,10 +386,17 @@ Value do_evaluate(const Position& pos) {
           bool one_pawn = (pos.count<PAWN>(WHITE) + pos.count<PAWN>(BLACK) == 1);
           sf = one_pawn ? ScaleFactor(8) : ScaleFactor(32);
       }
-      else
-          // Endgame with opposite-colored bishops, but also other pieces. Still
-          // a bit drawish, but not as drawish as with only the two bishops.
-           sf = ScaleFactor(50);
+      else {
+           int eg = 50;
+           int mg = 70;
+
+           int x = eg + ((PHASE_MIDGAME - PHASE_ENDGAME) * (mg - eg)) / (1 + PHASE_MIDGAME - ei.mi->game_phase());
+
+           assert(x >= eg);
+           assert(x <= mg);
+           
+           sf = ScaleFactor(x);
+      }
   }
 
   Value v = interpolate(score, ei.mi->game_phase(), sf);
