@@ -174,7 +174,7 @@ namespace {
   const Score RookOpenFile     = make_score(43, 21);
   const Score RookSemiopenFile = make_score(19, 10);
   const Score BishopPawns      = make_score( 8, 12);
-  const Score OpBishopPawns    = make_score( 0, 10);
+  const Score OpBishopPawns    = make_score( 0, 15);
   const Score KnightPawns      = make_score( 8,  4);
   const Score MinorBehindPawn  = make_score(16,  0);
   const Score UndefendedMinor  = make_score(25, 10);
@@ -526,7 +526,7 @@ Value do_evaluate(const Position& pos) {
         // Penalty for bishop with same coloured pawns
         if (Piece == BISHOP) {
             score -= BishopPawns * ei.pi->pawns_on_same_color_squares(Us, s);
-            score += OpBishopPawns * ei.pi->pawns_on_same_color_squares(Them, s);
+            score += OpBishopPawns * (ei.pi->pawns_on_same_color_squares(Them, s) - 3);
         }
 
         // Penalty for knight when there are few enemy pawns
