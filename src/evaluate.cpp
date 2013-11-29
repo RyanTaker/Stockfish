@@ -173,7 +173,7 @@ namespace {
   const Score QueenOnPawn      = make_score( 4, 20);
   const Score RookOpenFile     = make_score(43, 21);
   const Score RookSemiopenFile = make_score(19, 10);
-  const Score BishopPawns      = make_score( 8, 12);
+  const Score SameBishopPawns  = make_score( 8, 12);
   const Score OpBishopPawns    = make_score( 0, 15);
   const Score KnightPawns      = make_score( 8,  4);
   const Score MinorBehindPawn  = make_score(16,  0);
@@ -523,9 +523,10 @@ Value do_evaluate(const Position& pos) {
                  && !more_than_one(BetweenBB[s][pos.king_square(Them)] & pos.pieces()))
                  score += BishopPin;
 
-        // Penalty for bishop with same coloured pawns
         if (Piece == BISHOP) {
-            score -= BishopPawns * ei.pi->pawns_on_same_color_squares(Us, s);
+            // Penalty for bishop with same coloured pawns
+            score -= SameBishopPawns * ei.pi->pawns_on_same_color_squares(Us, s);
+            // Reward for bishop with enemy same coloured pawns
             score += OpBishopPawns * (ei.pi->pawns_on_same_color_squares(Them, s) - 3);
         }
 
