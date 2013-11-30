@@ -387,10 +387,15 @@ Value do_evaluate(const Position& pos) {
           sf = one_pawn ? ScaleFactor(8) : ScaleFactor(32);
       }
       else {
-           int eg = 50;
-           int mg = 70;
+           static int eg = 35;
+           static int mg = 60;
+           static int delta = (PHASE_MIDGAME - PHASE_ENDGAME) * (mg - eg);
+           static int moreMid = 1 + PHASE_MIDGAME
+           
+           assert(mg > eg);
+           assert(ei.mi->game_phase() <= PHASE_MIDGAME);
 
-           int x = eg + ((PHASE_MIDGAME - PHASE_ENDGAME) * (mg - eg)) / (1 + PHASE_MIDGAME - ei.mi->game_phase());
+           int x = eg + delta / (moreMid - ei.mi->game_phase());
 
            assert(x >= eg);
            assert(x <= mg);
