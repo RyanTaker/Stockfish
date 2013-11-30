@@ -390,7 +390,7 @@ Value do_evaluate(const Position& pos) {
            static int eg = 35;
            static int mg = 60;
            static int delta = (PHASE_MIDGAME - PHASE_ENDGAME) * (mg - eg);
-           static int moreMid = 1 + PHASE_MIDGAME
+           static int moreMid = 1 + PHASE_MIDGAME;
            
            assert(mg > eg);
            assert(ei.mi->game_phase() <= PHASE_MIDGAME);
