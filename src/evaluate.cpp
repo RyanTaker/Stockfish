@@ -534,6 +534,13 @@ Value do_evaluate(const Position& pos) {
         // Special extra evaluation for rooks
         if (Piece == ROOK)
         {
+			int rookUpA = 4 - relative_rank(Us, rank_of(s));
+			int rookUpB = 5 - relative_rank(Us, rank_of(s));
+			int rookDFromCenter = std::min(std::abs(rookUpA), std::abs(rookUpB));
+			int rookUp = 4 - rookDFromCenter;
+
+			score += make_score(rookUp * rookUp * 2, 0);
+
             // Give a bonus for a rook on a open or semi-open file
             if (ei.pi->semiopen(Us, file_of(s)))
                 score += ei.pi->semiopen(Them, file_of(s)) ? RookOpenFile : RookSemiopenFile;
