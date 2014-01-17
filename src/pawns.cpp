@@ -264,6 +264,13 @@ Value Entry::shelter_storm(const Position& pos, Square ksq) {
       else
           safety -= ShelterWeakness[rkUs]
                   + StormDanger[rkUs == RANK_1 ? 0 : rkThem == rkUs + 1 ? 2 : 1][rkThem];
+
+	  if(ourPawns & rank_bb(rkUs + relative_rank(Us, RANK_1)) & file_bb(f)) {
+		  safety += Value(35);
+	  }
+	  else if(ourPawns & rank_bb(rkUs + relative_rank(Us, RANK_2)) & file_bb(f)) {
+		  safety += Value(25);
+	  }
   }
 
   return safety;
