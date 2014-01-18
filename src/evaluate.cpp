@@ -703,6 +703,20 @@ Value do_evaluate(const Position& pos) {
         score -= KingDanger[Us == Search::RootColor][attackUnits];
     }
 
+	File f = file_of(ksq);
+	Rank r = rank_of(ksq);
+	Bitboard pps = ei.pi->passed_pawns(Us) | ei.pi->passed_pawns(Them);
+
+	//King Evaluates for the Endgame
+	bool fRim = (f == FILE_A || f == FILE_H) && !(pps & file_bb(f));
+
+	bool rRim = (r == RANK_1 || r == RANK_8) &&
+		!(  r == relative_rank(Us, RANK_1) && ei.pi->passed_pawns(Them))
+		|| (r == relative_rank(Us, RANK_8) && ei.pi->passed_pawns(Us));
+	
+	int rimNum = (fRim ? 7 : 1) * (rRim ? 7 : 1) - 1;
+	score -= make_score(0, rimNum);
+
     if (Trace)
         Tracing::scores[Us][KING] = score;
 
