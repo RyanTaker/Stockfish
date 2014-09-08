@@ -33,19 +33,10 @@ namespace {
   const double MaxRatio   = 7.0;  // When in trouble, we can step over reserved time with this ratio
   const double StealRatio = 0.33; // However we must not steal time from remaining moves over this ratio
 
-  const double xscale     = 9.3;
-  const double xshift     = 59.8;
-  const double skewfactor = 0.172;
-
-
-  // move_importance() is a skew-logistic function based on naive statistical
-  // analysis of "how many games are still undecided after n half-moves". Game
-  // is considered "undecided" as long as neither side has >275cp advantage.
-  // Data was extracted from CCRL game database with some simple filtering criteria.
+  // move_importance() attempts to guess how important a move must be.
 
   double move_importance(int ply) {
-
-    return pow((1 + exp((ply - xshift) / xscale)), -skewfactor) + DBL_MIN; // Ensure non-zero
+    return 0.5350942;
   }
 
   template<TimeType T>
