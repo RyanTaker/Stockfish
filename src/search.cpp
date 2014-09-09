@@ -34,6 +34,7 @@
 #include "thread.h"
 #include "tt.h"
 #include "ucioption.h"
+#include "bitcount.h"
 
 namespace Search {
 
@@ -186,11 +187,11 @@ template uint64_t Search::perft<true>(Position& pos, Depth depth);
 void Search::think() {
 
   int mat = 0;
-  mat += RootPos.pieces(RootPos.side_to_move(), PAWN);
-  mat += RootPos.pieces(RootPos.side_to_move(), KNIGHT) * 3;
-  mat += RootPos.pieces(RootPos.side_to_move(), BISHOP) * 3;
-  mat += RootPos.pieces(RootPos.side_to_move(), ROOK) * 5;
-  mat += RootPos.pieces(RootPos.side_to_move(), QUEEN) * 9;
+  mat += popcount<CNT_32_MAX15>(RootPos.pieces(RootPos.side_to_move(), PAWN));
+  mat += popcount<CNT_32_MAX15>(RootPos.pieces(RootPos.side_to_move(), KNIGHT)) * 3;
+  mat += popcount<CNT_32_MAX15>(RootPos.pieces(RootPos.side_to_move(), BISHOP)) * 3;
+  mat += popcount<CNT_32_MAX15>(RootPos.pieces(RootPos.side_to_move(), ROOK)) * 5;
+  mat += popcount<CNT_32_MAX15>(RootPos.pieces(RootPos.side_to_move(), QUEEN)) * 9;
   
   TimeMgr.init(Limits, RootPos.game_ply(), RootPos.side_to_move(), mat);
 

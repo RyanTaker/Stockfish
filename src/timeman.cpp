@@ -48,8 +48,12 @@ namespace {
   }
   
   int truePly(int matInfo) {
-      double dev = 126226.0 / pow(matInfo, 2.688) - 1.0;
-      double deci = std::max(0.0, 19.0 + 10.0 * log(dev) + 19.0);
+      if(matInfo == 0) {
+          return 200;
+      }
+      
+      double dev = 19587.6 / pow((double)matInfo, 2.688);
+      double deci = (19.0 + 10.0 * log(dev - 1.0)) + 15;
       
       return (int)deci;
   }
