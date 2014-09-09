@@ -185,7 +185,14 @@ template uint64_t Search::perft<true>(Position& pos, Depth depth);
 
 void Search::think() {
 
-  TimeMgr.init(Limits, RootPos.game_ply(), RootPos.side_to_move());
+  int mat = 0;
+  mat += RootPos.pieces(RootPos.side_to_move(), PAWN);
+  mat += RootPos.pieces(RootPos.side_to_move(), KNIGHT) * 3;
+  mat += RootPos.pieces(RootPos.side_to_move(), BISHOP) * 3;
+  mat += RootPos.pieces(RootPos.side_to_move(), ROOK) * 5;
+  mat += RootPos.pieces(RootPos.side_to_move(), QUEEN) * 9;
+  
+  TimeMgr.init(Limits, RootPos.game_ply(), RootPos.side_to_move(), mat);
 
   int cf = Options["Contempt Factor"] * PawnValueEg / 100; // From centipawns
   DrawValue[ RootPos.side_to_move()] = VALUE_DRAW - Value(cf);
