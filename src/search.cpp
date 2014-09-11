@@ -193,7 +193,25 @@ void Search::think() {
   mat += popcount<CNT_32_MAX15>(RootPos.pieces(RootPos.side_to_move(), ROOK)) * 5;
   mat += popcount<CNT_32_MAX15>(RootPos.pieces(RootPos.side_to_move(), QUEEN)) * 9;
   
-  TimeMgr.init(Limits, RootPos.game_ply(), RootPos.side_to_move(), mat);
+  int pmoves = 0;
+        for(Color c = WHITE; c <= BLACK; c = Color(c + 1)) {
+          Bitboard b = RootPos.pieces(c, PAWN);
+          
+            for(int i = 1; i < 6; i++) {
+                    
+                    int num  = popcount<CNT_32_MAX15>(b & rank_bb(relative_rank(c, Rank(RANK_2 + i))));
+                    
+                    if(i == 1) {
+                         pmoves += num;
+                    } else {
+                      pmoves += num * (i - 1);
+                    }
+                    
+            }
+      }
+
+  
+  TimeMgr.init(Limits, RootPos.game_ply(), RootPos.side_to_move(), mat, pmoves);
 
   int cf = Options["Contempt Factor"] * PawnValueEg / 100; // From centipawns
   DrawValue[ RootPos.side_to_move()] = VALUE_DRAW - Value(cf);

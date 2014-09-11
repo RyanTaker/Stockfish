@@ -47,7 +47,7 @@ namespace {
     return pow((1 + exp((ply - xshift) / xscale)), -skewfactor) + DBL_MIN; // Ensure non-zero
   }
   
-  int truePly(int matInfo) {
+  int truePly(int matInfo, int pmoves) {
       if(matInfo == 0) {
           return 200;
       }
@@ -55,16 +55,18 @@ namespace {
       double dev = 19587.6 / pow((double)matInfo, 2.688);
       double deci = (19.0 + 10.0 * log(dev - 1.0)) + 15;
       
-      return (int)deci;
+      double sudoPly = deci + pmoves;
+
+      return (int)sudoPly;
   }
 
   template<TimeType T>
-  int remaining(int myTime, int movesToGo, int currentPly, int slowMover, int matInfo)
+  int remaining(int myTime, int movesToGo, int currentPly, int slowMover, int matInfo, int pmoves)
   {
     const double TMaxRatio   = (T == OptimumTime ? 1 : MaxRatio);
     const double TStealRatio = (T == OptimumTime ? 0 : StealRatio);
     
-    int tPly = (truePly(matInfo) + currentPly) / 2;
+    int tPly = (truePly(matInfo, pmoves) + currentPly) / 2;
 
     double thisMoveImportance = (move_importance(tPly) * slowMover) / 100;
     double otherMovesImportance = 0;
@@ -81,7 +83,7 @@ namespace {
 } // namespace
 
 
-void TimeManager::init(const Search::LimitsType& limits, int currentPly, Color us, int matInfo)
+void TimeManager::init(const Search::LimitsType& limits, int currentPly, Color us, int matInfo, int pmoves)
 {
   /* We support four different kinds of time controls:
 
@@ -123,8 +125,8 @@ void TimeManager::init(const Search::LimitsType& limits, int currentPly, Color u
 
       hypMyTime = std::max(hypMyTime, 0);
 
-      t1 = minThinkingTime + remaining<OptimumTime>(hypMyTime, hypMTG, currentPly, slowMover, matInfo);
-      t2 = minThinkingTime + remaining<MaxTime>(hypMyTime, hypMTG, currentPly, slowMover, matInfo);
+      t1 = minThinkingTime + remaining<OptimumTime>(hypMyTime, hypMTG, currentPly, slowMover, matInfo, pmoves);
+      t2 = minThinkingTime + remaining<MaxTime>(hypMyTime, hypMTG, currentPly, slowMover, matInfo, pmoves);
 
       optimumSearchTime = std::min(optimumSearchTime, t1);
       maximumSearchTime = std::min(maximumSearchTime, t2);
