@@ -61,12 +61,10 @@ namespace {
   }
 
   template<TimeType T>
-  int remaining(int myTime, int movesToGo, int currentPly, int slowMover, int matInfo, int pmoves)
+  int remaining(int myTime, int movesToGo, int currentPly, int slowMover, int tPly)
   {
     const double TMaxRatio   = (T == OptimumTime ? 1 : MaxRatio);
     const double TStealRatio = (T == OptimumTime ? 0 : StealRatio);
-    
-    int tPly = (truePly(matInfo, pmoves) + currentPly) / 2;
 
     double thisMoveImportance = (move_importance(tPly) * slowMover) / 100;
     double otherMovesImportance = 0;
@@ -109,6 +107,8 @@ void TimeManager::init(const Search::LimitsType& limits, int currentPly, Color u
   int minThinkingTime      = Options["Minimum Thinking Time"];
   int slowMover            = Options["Slow Mover"];
 
+  int tPly = (truePly(matInfo, pmoves) + currentPly) / 2;
+
   // Initialize unstablePvFactor to 1 and search times to maximum values
   unstablePvFactor = 1;
   optimumSearchTime = maximumSearchTime = std::max(limits.time[us], minThinkingTime);
@@ -125,8 +125,8 @@ void TimeManager::init(const Search::LimitsType& limits, int currentPly, Color u
 
       hypMyTime = std::max(hypMyTime, 0);
 
-      t1 = minThinkingTime + remaining<OptimumTime>(hypMyTime, hypMTG, currentPly, slowMover, matInfo, pmoves);
-      t2 = minThinkingTime + remaining<MaxTime>(hypMyTime, hypMTG, currentPly, slowMover, matInfo, pmoves);
+      t1 = minThinkingTime + remaining<OptimumTime>(hypMyTime, hypMTG, currentPly, slowMover, tPly);
+      t2 = minThinkingTime + remaining<MaxTime>(hypMyTime, hypMTG, currentPly, slowMover, tPly);
 
       optimumSearchTime = std::min(optimumSearchTime, t1);
       maximumSearchTime = std::min(maximumSearchTime, t2);
