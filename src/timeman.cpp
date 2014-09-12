@@ -107,7 +107,7 @@ void TimeManager::init(const Search::LimitsType& limits, int currentPly, Color u
   int minThinkingTime      = Options["Minimum Thinking Time"];
   int slowMover            = Options["Slow Mover"];
 
-  int tPly = (truePly(matInfo, pmoves) + currentPly) / 2;
+  int tPly = truePly(matInfo, pmoves);
 
   // Initialize unstablePvFactor to 1 and search times to maximum values
   unstablePvFactor = 1;
