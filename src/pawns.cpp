@@ -188,20 +188,20 @@ namespace {
   
   // Degree messured as a scale between 0(no blockade) and 255(total blockade)
   int blockadeDegree(const Position& pos, Pawns::Entry* e) {
-	if(pos.count<PAWN>(WHITE) < 8 || pos.count<PAWN>(BLACK) < 8)
-		return 0;
-  
-    Bitboard whitePawns = pos.pieces(WHITE, PAWN);
-    Bitboard blackPawns = pos.pieces(BLACK, PAWN);
-	
-	if(shift_bb<DELTA_N>(whitePawns) == blackPawns) { // Prove white and black have fully touching pawn lines
-		// We only need check white pawns from now on as black's are identical
-		
-		// Make sure we don't have any pawns side by side.
-		if(shift_bb<DELTA_W>(whitePawns) & whitePawns)
-			return 0;
+	Bitboard whitePawns = pos.pieces(WHITE, PAWN);
+	Bitboard blackPawns = pos.pieces(BLACK, PAWN);
 
-		return 1;
+	// Ideal blockades
+	if(pos.count<PAWN>(WHITE) >= 8 && pos.count<PAWN>(BLACK) >= 8) {
+		// Shows that white and black pawns are identical and none are next to eachother
+		if(shift_bb<DELTA_N>(whitePawns) == blackPawns && !(shift_bb<DELTA_W>(whitePawns) & whitePawns)) {
+			// Ensure there is no gap
+			Bitboard connect = (shift_bb<DELTA_NE>(whitePawns) | shift_bb<DELTA_SE>(whitePawns)) & whitePawns;
+			if(popcount<Max15>(connect) == 7)
+				return 100;
+			else
+				return 0; // If there is a gap, the current blockade eval cannot detect a blockade
+		}
 	}
 
     return 0;
