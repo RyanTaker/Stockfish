@@ -31,7 +31,6 @@ namespace Pawns {
 /// pointer to an Entry object.
 
 struct Entry {
-
   Score pawns_value() const { return value; }
   Bitboard pawn_attacks(Color c) const { return pawnAttacks[c]; }
   Bitboard passed_pawns(Color c) const { return passedPawns[c]; }
@@ -75,6 +74,9 @@ struct Entry {
   int semiopenFiles[COLOR_NB];
   int pawnSpan[COLOR_NB];
   int pawnsOnSquares[COLOR_NB][COLOR_NB]; // [color][light/dark squares]
+  
+  // Blockade Information
+  int blockDegree;
 };
 
 typedef HashTable<Entry, 16384> Table;

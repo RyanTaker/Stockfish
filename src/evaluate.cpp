@@ -706,6 +706,7 @@ namespace {
 
     // Probe the pawn hash table
     ei.pi = Pawns::probe(pos, thisThread->pawnsTable);
+
     score += apply_weight(ei.pi->pawns_value(), Weights[PawnStructure]);
 
     // Initialize attack and king safety bitboards
@@ -777,6 +778,9 @@ namespace {
                  && !pos.pawn_passed(~strongSide, pos.king_square(~strongSide)))
                  sf = ei.pi->pawn_span(strongSide) ? ScaleFactor(56) : ScaleFactor(38);
     }
+	
+	if(ei.pi->blockDegree)
+		sf = ScaleFactor(1);
 
     // Interpolate between a middlegame and a (scaled by 'sf') endgame score
     Value v =  mg_value(score) * int(ei.mi->game_phase())

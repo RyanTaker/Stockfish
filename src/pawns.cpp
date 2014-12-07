@@ -185,6 +185,27 @@ namespace {
 
     return value;
   }
+  
+  // Degree messured as a scale between 0(no blockade) and 255(total blockade)
+  int blockadeDegree(const Position& pos, Pawns::Entry* e) {
+	if(pos.count<PAWN>(WHITE) < 8 || pos.count<PAWN>(BLACK) < 8)
+		return 0;
+  
+    Bitboard whitePawns = pos.pieces(WHITE, PAWN);
+    Bitboard blackPawns = pos.pieces(BLACK, PAWN);
+	
+	if(shift_bb<DELTA_N>(whitePawns) == blackPawns) { // Prove white and black have fully touching pawn lines
+		// We only need check white pawns from now on as black's are identical
+		
+		// Make sure we don't have any pawns side by side.
+		if(shift_bb<DELTA_W>(whitePawns) & whitePawns)
+			return 0;
+
+		return 1;
+	}
+
+    return 0;
+  }
 
 } // namespace
 
@@ -222,6 +243,8 @@ Entry* probe(const Position& pos, Table& entries) {
 
   e->key = key;
   e->value = evaluate<WHITE>(pos, e) - evaluate<BLACK>(pos, e);
+  e->blockDegree = blockadeDegree(pos, e); // May depend on things set in evaluate
+
   return e;
 }
 
