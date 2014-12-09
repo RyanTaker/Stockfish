@@ -77,6 +77,8 @@ struct Entry {
   
   // Blockade Information
   Blockade blockadeType;
+  Bitboard whiteTerritory;
+  Bitboard blackTerritory;
 };
 
 typedef HashTable<Entry, 16384> Table;

@@ -779,24 +779,26 @@ namespace {
                  sf = ei.pi->pawn_span(strongSide) ? ScaleFactor(56) : ScaleFactor(38);
     }
 	
-	Blockade block = ei.pi->blockadeType;
+	if(!(ei.pi->whiteTerritory & pos.pieces(BLACK) || ei.pi ->blackTerritory & pos.pieces(WHITE))) {
+		Blockade block = ei.pi->blockadeType;
 
-	if(block == BLOCK_SIMPLE)
-		sf = ScaleFactor(1);
-	else {
-		int wcount = (pos.count<KNIGHT>(WHITE) + pos.count<ROOK>(WHITE) + pos.count<QUEEN>(WHITE));
-		int bcount = (pos.count<KNIGHT>(BLACK) + pos.count<ROOK>(BLACK) + pos.count<QUEEN>(BLACK));
-	
-		if(!(wcount + bcount)) {
-			Bitboard wBishops = pos.pieces(WHITE, BISHOP);
-			Bitboard bBishops = pos.pieces(BLACK, BISHOP);
+		if(block == BLOCK_SIMPLE)
+			sf = ScaleFactor(1);
+		else {
+			int wcount = (pos.count<KNIGHT>(WHITE) + pos.count<ROOK>(WHITE) + pos.count<QUEEN>(WHITE));
+			int bcount = (pos.count<KNIGHT>(BLACK) + pos.count<ROOK>(BLACK) + pos.count<QUEEN>(BLACK));
+		
+			if(!(wcount + bcount)) {
+				Bitboard wBishops = pos.pieces(WHITE, BISHOP);
+				Bitboard bBishops = pos.pieces(BLACK, BISHOP);
 
-			if(block == BLOCK_BISHOP_BOTH)
-				sf = ScaleFactor(1);
-			else if(block == BLOCK_BISHOP_LIGHT && !(wBishops & ~DarkSquares) && !(bBishops & DarkSquares))
-				sf = ScaleFactor(1);
-			else if(block == BLOCK_BISHOP_DARK && !(wBishops & DarkSquares) && !(bBishops & ~DarkSquares))
-				sf = ScaleFactor(1);
+				if(block == BLOCK_BISHOP_BOTH)
+					sf = ScaleFactor(1);
+				else if(block == BLOCK_BISHOP_LIGHT && !(wBishops & ~DarkSquares) && !(bBishops & DarkSquares))
+					sf = ScaleFactor(1);
+				else if(block == BLOCK_BISHOP_DARK && !(wBishops & DarkSquares) && !(bBishops & ~DarkSquares))
+					sf = ScaleFactor(1);
+			}
 		}
 	}
 

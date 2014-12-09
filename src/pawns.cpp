@@ -186,6 +186,15 @@ namespace {
     return value;
   }
   
+  template <Square delta>
+  Bitboard markTerritory(Bitboard b) {
+	for(int i = 0; i < 6; i++) {
+		b |= shift_bb<delta>(b);
+	}
+	
+	return b;
+  }
+  
    bool isBishopBlockade(const Position& pos, Bitboard relaventPawn, Bitboard enemyPawns) {
 		Bitboard wall = shift_bb<DELTA_NW>(relaventPawn) | shift_bb<DELTA_NE>(relaventPawn) | enemyPawns;
 
@@ -202,6 +211,9 @@ namespace {
 
 	int wcount = pos.count<PAWN>(WHITE);
 	int bcount = pos.count<PAWN>(BLACK);
+	
+	e->whiteTerritory = markTerritory<DELTA_S>(whitePawns);
+	e->blackTerritory = markTerritory<DELTA_N>(blackPawns);
 
 	// Shows that white and black pawns are identical and none are next to eachother
 	if(shift_bb<DELTA_N>(whitePawns) == blackPawns && !(shift_bb<DELTA_W>(whitePawns) & whitePawns)) {
