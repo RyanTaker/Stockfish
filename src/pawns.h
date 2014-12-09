@@ -76,7 +76,7 @@ struct Entry {
   int pawnsOnSquares[COLOR_NB][COLOR_NB]; // [color][light/dark squares]
   
   // Blockade Information
-  int blockDegree;
+  Blockade blockadeType;
 };
 
 typedef HashTable<Entry, 16384> Table;

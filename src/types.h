@@ -250,6 +250,10 @@ enum Rank {
   RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NB
 };
 
+enum Blockade {
+  BLOCK_NONE, BLOCK_SIMPLE, BLOCK_BISHOP_BOTH, BLOCK_BISHOP_LIGHT, BLOCK_BISHOP_DARK
+};
+
 
 /// The Score enum stores a middlegame and an endgame value in a single integer
 /// (enum). The least significant 16 bits are used to store the endgame value

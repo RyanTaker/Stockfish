@@ -186,27 +186,48 @@ namespace {
     return value;
   }
   
+   bool isBishopBlockade(const Position& pos, Bitboard relaventPawn, Bitboard enemyPawns) {
+		Bitboard wall = shift_bb<DELTA_NW>(relaventPawn) | shift_bb<DELTA_NE>(relaventPawn) | enemyPawns;
+
+		if(((wall & Rank2BB) != Rank2BB) && ((wall & Rank3BB) != Rank3BB) && ((wall & Rank4BB) != Rank4BB) && ((wall & Rank5BB) != Rank5BB) && ((wall & Rank6BB) != Rank6BB) && ((wall & Rank7BB) != Rank7BB))
+			return false;
+
+		return true; // Should be subject to more.
+   }
+  
   // Degree messured as a scale between 0(no blockade) and 255(total blockade)
-  int blockadeDegree(const Position& pos, Pawns::Entry* e) {
+  Blockade identifyBlockade(const Position& pos, Pawns::Entry* e) {
 	Bitboard whitePawns = pos.pieces(WHITE, PAWN);
 	Bitboard blackPawns = pos.pieces(BLACK, PAWN);
 
-	// Ideal blockades
-	if(pos.count<PAWN>(WHITE) >= 8 && pos.count<PAWN>(BLACK) >= 8) {
-		// Shows that white and black pawns are identical and none are next to eachother
-		if(shift_bb<DELTA_N>(whitePawns) == blackPawns && !(shift_bb<DELTA_W>(whitePawns) & whitePawns)) {
+	int wcount = pos.count<PAWN>(WHITE);
+	int bcount = pos.count<PAWN>(BLACK);
+
+	// Shows that white and black pawns are identical and none are next to eachother
+	if(shift_bb<DELTA_N>(whitePawns) == blackPawns && !(shift_bb<DELTA_W>(whitePawns) & whitePawns)) {
+		// Ideal blockades
+		if(wcount == 8 && bcount == 8) {
 			// Ensure there is no gap
 			Bitboard connect = (shift_bb<DELTA_NE>(whitePawns) | shift_bb<DELTA_SE>(whitePawns)) & whitePawns;
 			if(popcount<Max15>(connect) == 7)
-				return 100;
-			else
-				return 0; // If there is a gap, the current blockade eval cannot detect a blockade
+				return BLOCK_SIMPLE;
+		} else if(wcount >= 4 && bcount >= 4) {
+			Bitboard wcomb = ~DarkSquares & whitePawns;
+			Bitboard bcomb = DarkSquares & whitePawns;
+
+			if(isBishopBlockade(pos, bcomb, blackPawns)) {
+				if(isBishopBlockade(pos, wcomb, blackPawns))
+					return BLOCK_BISHOP_BOTH;
+				else
+					return BLOCK_BISHOP_LIGHT;
+			} else if(isBishopBlockade(pos, wcomb, blackPawns)) {
+				return BLOCK_BISHOP_DARK;
+			}
 		}
 	}
 
-    return 0;
+    return BLOCK_NONE;
   }
-
 } // namespace
 
 namespace Pawns {
@@ -243,7 +264,7 @@ Entry* probe(const Position& pos, Table& entries) {
 
   e->key = key;
   e->value = evaluate<WHITE>(pos, e) - evaluate<BLACK>(pos, e);
-  e->blockDegree = blockadeDegree(pos, e); // May depend on things set in evaluate
+  e->blockadeType = identifyBlockade(pos, e); // May depend on things set in evaluate
 
   return e;
 }
