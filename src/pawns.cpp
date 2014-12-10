@@ -185,7 +185,7 @@ namespace {
 
     return value;
   }
-  
+
   template <Square delta>
   Bitboard markTerritory(Bitboard b) {
 	for(int i = 0; i < 6; i++) {

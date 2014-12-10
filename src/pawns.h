@@ -31,6 +31,7 @@ namespace Pawns {
 /// pointer to an Entry object.
 
 struct Entry {
+
   Score pawns_value() const { return value; }
   Bitboard pawn_attacks(Color c) const { return pawnAttacks[c]; }
   Bitboard passed_pawns(Color c) const { return passedPawns[c]; }
