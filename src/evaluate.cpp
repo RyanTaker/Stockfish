@@ -706,6 +706,34 @@ namespace {
 
     // Probe the pawn hash table
     ei.pi = Pawns::probe(pos, thisThread->pawnsTable);
+	
+	Blockade block = ei.pi->blockadeType;
+	
+	if(block != BLOCK_NONE) {
+		bool whiteStronger = (mg_value(score) + eg_value(score) > 0);
+		Value blockVal = Value((whiteStronger ? -1 : 1) * 10);
+
+		if((whiteStronger && !(ei.pi->blackTerritory & pos.pieces(WHITE))) || (!whiteStronger && !(ei.pi->whiteTerritory & pos.pieces(BLACK)))) {
+			if(block == BLOCK_SIMPLE)
+				return blockVal;
+			else {
+				int wcount = (pos.count<KNIGHT>(WHITE) + pos.count<ROOK>(WHITE) + pos.count<QUEEN>(WHITE));
+				int bcount = (pos.count<KNIGHT>(BLACK) + pos.count<ROOK>(BLACK) + pos.count<QUEEN>(BLACK));
+
+				if(!(wcount + bcount)) {
+					Bitboard wBishops = pos.pieces(WHITE, BISHOP);
+					Bitboard bBishops = pos.pieces(BLACK, BISHOP);
+
+					if(block == BLOCK_BISHOP_BOTH)
+						return blockVal;
+					else if(block == BLOCK_BISHOP_LIGHT && !(wBishops & ~DarkSquares) && !(bBishops & DarkSquares))
+						return blockVal;
+					else if(block == BLOCK_BISHOP_DARK && !(wBishops & DarkSquares) && !(bBishops & ~DarkSquares))
+						return blockVal;
+				}
+			}
+		}
+	}
 
     score += apply_weight(ei.pi->pawns_value(), Weights[PawnStructure]);
 
@@ -778,29 +806,6 @@ namespace {
                  && !pos.pawn_passed(~strongSide, pos.king_square(~strongSide)))
                  sf = ei.pi->pawn_span(strongSide) ? ScaleFactor(56) : ScaleFactor(38);
     }
-	
-	if(!(ei.pi->whiteTerritory & pos.pieces(BLACK) || ei.pi ->blackTerritory & pos.pieces(WHITE))) {
-		Blockade block = ei.pi->blockadeType;
-
-		if(block == BLOCK_SIMPLE)
-			sf = ScaleFactor(1);
-		else {
-			int wcount = (pos.count<KNIGHT>(WHITE) + pos.count<ROOK>(WHITE) + pos.count<QUEEN>(WHITE));
-			int bcount = (pos.count<KNIGHT>(BLACK) + pos.count<ROOK>(BLACK) + pos.count<QUEEN>(BLACK));
-		
-			if(!(wcount + bcount)) {
-				Bitboard wBishops = pos.pieces(WHITE, BISHOP);
-				Bitboard bBishops = pos.pieces(BLACK, BISHOP);
-
-				if(block == BLOCK_BISHOP_BOTH)
-					sf = ScaleFactor(1);
-				else if(block == BLOCK_BISHOP_LIGHT && !(wBishops & ~DarkSquares) && !(bBishops & DarkSquares))
-					sf = ScaleFactor(1);
-				else if(block == BLOCK_BISHOP_DARK && !(wBishops & DarkSquares) && !(bBishops & ~DarkSquares))
-					sf = ScaleFactor(1);
-			}
-		}
-	}
 
     // Interpolate between a middlegame and a (scaled by 'sf') endgame score
     Value v =  mg_value(score) * int(ei.mi->game_phase())
