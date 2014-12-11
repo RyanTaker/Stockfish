@@ -80,7 +80,7 @@ struct Entry {
   Blockade blockadeType;
   Bitboard whiteTerritory;
   Bitboard blackTerritory;
-  Bitboard luftLine; // Only applies when the territory is sealable
+  Bitboard blockCriticals; // Only applies when the territory is sealable
 };
 
 typedef HashTable<Entry, 16384> Table;

@@ -198,10 +198,29 @@ namespace {
    bool isBishopBlockade(const Position& pos, Bitboard relaventPawn, Bitboard enemyPawns) {
 		Bitboard wall = shift_bb<DELTA_NW>(relaventPawn) | shift_bb<DELTA_NE>(relaventPawn) | enemyPawns;
 
-		if(((wall & Rank2BB) != Rank2BB) && ((wall & Rank3BB) != Rank3BB) && ((wall & Rank4BB) != Rank4BB) && ((wall & Rank5BB) != Rank5BB) && ((wall & Rank6BB) != Rank6BB) && ((wall & Rank7BB) != Rank7BB))
+		Bitboard rb;
+		
+		if((wall & Rank3BB) == Rank3BB)
+			rb = Rank3BB;
+		else if((wall & Rank4BB) == Rank4BB)
+			rb = Rank4BB;
+		else if((wall & Rank5BB) == Rank5BB)
+			rb = Rank5BB;
+		else if((wall & Rank6BB) == Rank6BB)
+			rb = Rank6BB;
+		else if((wall & Rank7BB) == Rank7BB)
+			rb = Rank7BB;
+		else
 			return false;
+			
+		Bitboard extraRelv = rb & enemyPawns;
 
-		return true; // Should be subject to more.
+		if((FileABB & extraRelv) && (FileCBB & extraRelv) && (FileEBB & extraRelv) && (FileGBB & extraRelv))
+			return !((FileBBB & extraRelv) || (FileDBB & extraRelv) || (FileFBB & extraRelv) || (FileHBB & extraRelv));
+		else if((FileBBB & extraRelv) && (FileDBB & extraRelv) && (FileFBB & extraRelv) && (FileHBB & extraRelv))
+			return !((FileABB & extraRelv) || (FileCBB & extraRelv) || (FileEBB & extraRelv) || (FileGBB & extraRelv));
+			
+		return false;
    }
   
   // Degree messured as a scale between 0(no blockade) and 255(total blockade)
@@ -234,7 +253,7 @@ namespace {
 					holes |= holes << 8;
 					holes |= holes >> 8;
 
-					e->luftLine = holes;
+					e->blockCriticals = holes;
 					return BLOCK_SEALABLE;
 				}
 			}

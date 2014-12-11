@@ -716,7 +716,7 @@ namespace {
 		if((whiteStronger && !(ei.pi->blackTerritory & pos.pieces(WHITE))) || (!whiteStronger && !(ei.pi->whiteTerritory & pos.pieces(BLACK)))) {
 			if(block == BLOCK_SIMPLE)
 				return Value(0);
-			else if(block == BLOCK_SEALABLE && (pos.pieces(defender) & ei.pi->luftLine)) {
+			else if(block == BLOCK_SEALABLE && (pos.pieces(defender) & ei.pi->blockCriticals)) {
 				return Value(0);
 			}
 			else {
