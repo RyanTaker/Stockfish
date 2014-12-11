@@ -217,12 +217,29 @@ namespace {
 
 	// Shows that white and black pawns are identical and none are next to eachother
 	if(shift_bb<DELTA_N>(whitePawns) == blackPawns && !(shift_bb<DELTA_W>(whitePawns) & whitePawns)) {
-		// Ideal blockades
-		if(wcount == 8 && bcount == 8) {
-			// Ensure there is no gap
+		if(wcount >= 7 && bcount >= 7) {
 			Bitboard connect = (shift_bb<DELTA_NE>(whitePawns) | shift_bb<DELTA_SE>(whitePawns)) & whitePawns;
-			if(popcount<Max15>(connect) == 7)
+
+			if(wcount == 8 && bcount == 8 && popcount<Max15>(connect) == 7) { // Ideal blockades
 				return BLOCK_SIMPLE;
+			} else { // Possibly Sealable Blockade
+				Bitboard comb = shift_bb<DELTA_NW>(whitePawns) & shift_bb<DELTA_NE>(whitePawns);
+				Bitboard supp = shift_bb<DELTA_SE>(comb) | shift_bb<DELTA_SW>(comb);
+
+				Bitboard holes = (comb | supp) & ~whitePawns;
+				Bitboard filled = shift_bb<DELTA_N>(blackPawns) & holes;
+				
+				holes &= ~filled;
+				if(popcount<Max15>(holes) == 1) {
+					holes |= holes << 8;
+					holes |= holes >> 8;
+
+					e->luftLine = holes;
+					return BLOCK_SEALABLE;
+				}
+			}
+			
+			
 		} else if(wcount >= 4 && bcount >= 4) {
 			Bitboard wcomb = ~DarkSquares & whitePawns;
 			Bitboard bcomb = DarkSquares & whitePawns;

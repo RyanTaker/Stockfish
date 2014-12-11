@@ -711,11 +711,15 @@ namespace {
 	
 	if(block != BLOCK_NONE) {
 		bool whiteStronger = (mg_value(score) + eg_value(score) > 0);
+		Color defender = whiteStronger ? BLACK : WHITE;
 		Value blockVal = Value((whiteStronger ? -1 : 1) * 10);
 
 		if((whiteStronger && !(ei.pi->blackTerritory & pos.pieces(WHITE))) || (!whiteStronger && !(ei.pi->whiteTerritory & pos.pieces(BLACK)))) {
 			if(block == BLOCK_SIMPLE)
 				return blockVal;
+			else if(block == BLOCK_SEALABLE && (pos.pieces(defender) & ei.pi->luftLine)) {
+				return blockVal * 2;
+			}
 			else {
 				int wcount = (pos.count<KNIGHT>(WHITE) + pos.count<ROOK>(WHITE) + pos.count<QUEEN>(WHITE));
 				int bcount = (pos.count<KNIGHT>(BLACK) + pos.count<ROOK>(BLACK) + pos.count<QUEEN>(BLACK));
