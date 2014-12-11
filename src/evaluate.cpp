@@ -712,13 +712,12 @@ namespace {
 	if(block != BLOCK_NONE) {
 		bool whiteStronger = (mg_value(score) + eg_value(score) > 0);
 		Color defender = whiteStronger ? BLACK : WHITE;
-		Value blockVal = Value((whiteStronger ? -1 : 1) * 10);
 
 		if((whiteStronger && !(ei.pi->blackTerritory & pos.pieces(WHITE))) || (!whiteStronger && !(ei.pi->whiteTerritory & pos.pieces(BLACK)))) {
 			if(block == BLOCK_SIMPLE)
-				return blockVal;
+				return Value(0);
 			else if(block == BLOCK_SEALABLE && (pos.pieces(defender) & ei.pi->luftLine)) {
-				return blockVal * 2;
+				return Value(0);
 			}
 			else {
 				int wcount = (pos.count<KNIGHT>(WHITE) + pos.count<ROOK>(WHITE) + pos.count<QUEEN>(WHITE));
@@ -729,11 +728,11 @@ namespace {
 					Bitboard bBishops = pos.pieces(BLACK, BISHOP);
 
 					if(block == BLOCK_BISHOP_BOTH)
-						return blockVal;
+						return Value(0);
 					else if(block == BLOCK_BISHOP_LIGHT && !(wBishops & ~DarkSquares) && !(bBishops & DarkSquares))
-						return blockVal;
+						return Value(0);
 					else if(block == BLOCK_BISHOP_DARK && !(wBishops & DarkSquares) && !(bBishops & ~DarkSquares))
-						return blockVal;
+						return Value(0);
 				}
 			}
 		}
