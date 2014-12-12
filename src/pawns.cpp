@@ -197,7 +197,6 @@ namespace {
   
    bool isBishopBlockade(const Position& pos, Bitboard relaventPawn, Bitboard enemyPawns) {
 		Bitboard wall = shift_bb<DELTA_NW>(relaventPawn) | shift_bb<DELTA_NE>(relaventPawn) | enemyPawns;
-
 		Bitboard rb;
 		
 		if((wall & Rank3BB) == Rank3BB)
@@ -213,14 +212,8 @@ namespace {
 		else
 			return false;
 			
-		Bitboard extraRelv = rb & enemyPawns;
-
-		if((FileABB & extraRelv) && (FileCBB & extraRelv) && (FileEBB & extraRelv) && (FileGBB & extraRelv))
-			return !((FileBBB & extraRelv) || (FileDBB & extraRelv) || (FileFBB & extraRelv) || (FileHBB & extraRelv));
-		else if((FileBBB & extraRelv) && (FileDBB & extraRelv) && (FileFBB & extraRelv) && (FileHBB & extraRelv))
-			return !((FileABB & extraRelv) || (FileCBB & extraRelv) || (FileEBB & extraRelv) || (FileGBB & extraRelv));
-
-		return false;
+		Bitboard relv = rb & enemyPawns;
+		return relv == (rb & DarkSquares) || relv == (rb & DarkSquares);
    }
   
   // Degree messured as a scale between 0(no blockade) and 255(total blockade)

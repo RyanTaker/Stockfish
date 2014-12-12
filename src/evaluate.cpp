@@ -715,7 +715,7 @@ namespace {
 		Color defender = whiteStronger ? BLACK : WHITE;
 		Bitboard weakTerritory = (defender == BLACK) ? ei.pi->blackTerritory : ei.pi->whiteTerritory;
 
-		if(!(attacker & weakTerritory)) {
+		if(!(pos.pieces(attacker) & weakTerritory)) {
 			if(block == BLOCK_SIMPLE)
 				return Value(0);
 			else if(block == BLOCK_SEALABLE && (pos.pieces(defender) & ei.pi->blockCriticals)) {
