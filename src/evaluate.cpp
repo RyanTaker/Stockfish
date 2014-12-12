@@ -706,19 +706,17 @@ namespace {
 
     // Probe the pawn hash table
     ei.pi = Pawns::probe(pos, thisThread->pawnsTable);
-	
-	Blockade block = ei.pi->blockadeType;
-	
-	if(block != BLOCK_NONE) {
+
+	if(ei.pi->blockadeType) {
 		bool whiteStronger = (mg_value(score) + eg_value(score) > 0);
 		Color attacker = whiteStronger ? WHITE : BLACK;
 		Color defender = whiteStronger ? BLACK : WHITE;
 		Bitboard weakTerritory = (defender == BLACK) ? ei.pi->blackTerritory : ei.pi->whiteTerritory;
 
 		if(!(pos.pieces(attacker) & weakTerritory)) {
-			if(block == BLOCK_SIMPLE)
+			if(ei.pi->blockadeType == BLOCK_SIMPLE)
 				return Value(0);
-			else if(block == BLOCK_SEALABLE && (pos.pieces(defender) & ei.pi->blockCriticals)) {
+			else if(ei.pi->blockadeType == BLOCK_SEALABLE && (pos.pieces(defender) & ei.pi->blockCriticals)) {
 				return Value(0);
 			}
 		}
@@ -728,9 +726,9 @@ namespace {
 				Bitboard strongKing = pos.pieces(attacker, KING);
 				
 				if(!(strongKing & weakTerritory)) {
-					if(block == BLOCK_BISHOP_LIGHT && !(wBishops & ~DarkSquares) && !(bBishops & DarkSquares))
+					if(ei.pi->blockadeType == BLOCK_BISHOP_LIGHT && !(wBishops & ~DarkSquares) && !(bBishops & DarkSquares))
 						return Value(0);
-					else if(block == BLOCK_BISHOP_DARK && !(wBishops & DarkSquares) && !(bBishops & ~DarkSquares))
+					else if(ei.pi->blockadeType == BLOCK_BISHOP_DARK && !(wBishops & DarkSquares) && !(bBishops & ~DarkSquares))
 						return Value(0);
 				}
 		}
