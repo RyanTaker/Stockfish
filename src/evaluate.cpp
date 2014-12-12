@@ -711,30 +711,28 @@ namespace {
 	
 	if(block != BLOCK_NONE) {
 		bool whiteStronger = (mg_value(score) + eg_value(score) > 0);
+		Color attacker = whiteStronger ? WHITE : BLACK;
 		Color defender = whiteStronger ? BLACK : WHITE;
+		Bitboard weakTerritory = (defender == BLACK) ? ei.pi->blackTerritory : ei.pi->whiteTerritory;
 
-		if((whiteStronger && !(ei.pi->blackTerritory & pos.pieces(WHITE))) || (!whiteStronger && !(ei.pi->whiteTerritory & pos.pieces(BLACK)))) {
+		if(!(attacker & weakTerritory)) {
 			if(block == BLOCK_SIMPLE)
 				return Value(0);
 			else if(block == BLOCK_SEALABLE && (pos.pieces(defender) & ei.pi->blockCriticals)) {
 				return Value(0);
 			}
-			else {
-				int wcount = (pos.count<KNIGHT>(WHITE) + pos.count<ROOK>(WHITE) + pos.count<QUEEN>(WHITE));
-				int bcount = (pos.count<KNIGHT>(BLACK) + pos.count<ROOK>(BLACK) + pos.count<QUEEN>(BLACK));
-
-				if(!(wcount + bcount)) {
-					Bitboard wBishops = pos.pieces(WHITE, BISHOP);
-					Bitboard bBishops = pos.pieces(BLACK, BISHOP);
-
-					if(block == BLOCK_BISHOP_BOTH)
-						return Value(0);
-					else if(block == BLOCK_BISHOP_LIGHT && !(wBishops & ~DarkSquares) && !(bBishops & DarkSquares))
+		}
+		if(!(pos.count<KNIGHT>(attacker) + pos.count<ROOK>(attacker) + pos.count<QUEEN>(attacker))) {
+				Bitboard wBishops = pos.pieces(WHITE, BISHOP);
+				Bitboard bBishops = pos.pieces(BLACK, BISHOP);
+				Bitboard strongKing = pos.pieces(attacker, KING);
+				
+				if(!(strongKing & weakTerritory)) {
+					if(block == BLOCK_BISHOP_LIGHT && !(wBishops & ~DarkSquares) && !(bBishops & DarkSquares))
 						return Value(0);
 					else if(block == BLOCK_BISHOP_DARK && !(wBishops & DarkSquares) && !(bBishops & ~DarkSquares))
 						return Value(0);
 				}
-			}
 		}
 	}
 

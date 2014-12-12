@@ -219,7 +219,7 @@ namespace {
 			return !((FileBBB & extraRelv) || (FileDBB & extraRelv) || (FileFBB & extraRelv) || (FileHBB & extraRelv));
 		else if((FileBBB & extraRelv) && (FileDBB & extraRelv) && (FileFBB & extraRelv) && (FileHBB & extraRelv))
 			return !((FileABB & extraRelv) || (FileCBB & extraRelv) || (FileEBB & extraRelv) || (FileGBB & extraRelv));
-			
+
 		return false;
    }
   
@@ -260,17 +260,10 @@ namespace {
 			
 			
 		} else if(wcount >= 4 && bcount >= 4) {
-			Bitboard wcomb = ~DarkSquares & whitePawns;
-			Bitboard bcomb = DarkSquares & whitePawns;
-
-			if(isBishopBlockade(pos, bcomb, blackPawns)) {
-				if(isBishopBlockade(pos, wcomb, blackPawns))
-					return BLOCK_BISHOP_BOTH;
-				else
-					return BLOCK_BISHOP_LIGHT;
-			} else if(isBishopBlockade(pos, wcomb, blackPawns)) {
+			if(isBishopBlockade(pos, DarkSquares & whitePawns, blackPawns))
+				return BLOCK_BISHOP_LIGHT;
+			else if(isBishopBlockade(pos, (~DarkSquares & whitePawns), blackPawns))
 				return BLOCK_BISHOP_DARK;
-			}
 		}
 	}
 
