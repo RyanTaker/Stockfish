@@ -723,9 +723,8 @@ namespace {
 		if(!(pos.count<KNIGHT>(attacker) + pos.count<ROOK>(attacker) + pos.count<QUEEN>(attacker))) {
 				Bitboard wBishops = pos.pieces(WHITE, BISHOP);
 				Bitboard bBishops = pos.pieces(BLACK, BISHOP);
-				Bitboard strongKing = pos.pieces(attacker, KING);
-				
-				if(!(strongKing & weakTerritory)) {
+
+				if(!(pos.pieces(attacker, KING) & weakTerritory)) {
 					if(ei.pi->blockadeType == BLOCK_BISHOP_LIGHT && !(wBishops & ~DarkSquares) && !(bBishops & DarkSquares))
 						return Value(0);
 					else if(ei.pi->blockadeType == BLOCK_BISHOP_DARK && !(wBishops & DarkSquares) && !(bBishops & ~DarkSquares))
