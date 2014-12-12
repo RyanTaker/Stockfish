@@ -211,7 +211,7 @@ namespace {
 			rb = Rank7BB;
 		else
 			return false;
-			
+
 		Bitboard relv = rb & enemyPawns;
 		return relv == (rb & DarkSquares) || relv == (rb & DarkSquares);
    }
@@ -298,8 +298,7 @@ Entry* probe(const Position& pos, Table& entries) {
 
   e->key = key;
   e->value = evaluate<WHITE>(pos, e) - evaluate<BLACK>(pos, e);
-  e->blockadeType = identifyBlockade(pos, e); // May depend on things set in evaluate
-
+  e->blockadeType = identifyBlockade(pos, e);
   return e;
 }
 
