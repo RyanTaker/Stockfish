@@ -711,6 +711,7 @@ namespace {
 		bool whiteStronger = (mg_value(score) + eg_value(score) > 0);
 		Color attacker = whiteStronger ? WHITE : BLACK;
 		Color defender = whiteStronger ? BLACK : WHITE;
+		Bitboard strongTerritory = (attacker == BLACK) ? ei.pi->blackTerritory : ei.pi->whiteTerritory;
 		Bitboard weakTerritory = (defender == BLACK) ? ei.pi->blackTerritory : ei.pi->whiteTerritory;
 
 		if(!(pos.pieces(attacker) & weakTerritory)) {
@@ -730,6 +731,10 @@ namespace {
 					else if(ei.pi->blockadeType == BLOCK_BISHOP_DARK && !(wBishops & DarkSquares) && !(bBishops & ~DarkSquares))
 						return Value(0);
 				}
+		}
+		if(!(pos.count<KNIGHT>(attacker) + pos.count<BISHOP>(attacker) + pos.count<ROOK>(attacker) + pos.count<QUEEN>(attacker))) {
+			if(!(pos.pieces(attacker, KING) & weakTerritory) &&  !(pos.pieces(defender, KING) & strongTerritory))
+				return Value(0);
 		}
 	}
 

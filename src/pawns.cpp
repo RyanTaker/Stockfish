@@ -226,6 +226,15 @@ namespace {
 	
 	e->whiteTerritory = markTerritory<DELTA_S>(whitePawns);
 	e->blackTerritory = markTerritory<DELTA_N>(blackPawns);
+	
+	Bitboard wClog = shift_bb<DELTA_NW>(whitePawns) & shift_bb<DELTA_NE>(whitePawns);
+	Bitboard bClog = shift_bb<DELTA_SW>(blackPawns) & shift_bb<DELTA_SE>(blackPawns);
+	
+	Bitboard bBack = shift_bb<DELTA_S>(blackPawns | bClog | whitePawns);
+	Bitboard wBack = shift_bb<DELTA_N>(whitePawns | wClog | whitePawns);
+
+	Bitboard whiteBlocked = whitePawns & bBack & ~(shift_bb<DELTA_NW>(whitePawns) | shift_bb<DELTA_NE>(whitePawns));
+	Bitboard blackBlocked = blackPawns & wBack & ~(shift_bb<DELTA_SW>(blackPawns) | shift_bb<DELTA_SE>(blackPawns));
 
 	// Shows that white and black pawns are identical and none are next to eachother
 	if(shift_bb<DELTA_N>(whitePawns) == blackPawns && !(shift_bb<DELTA_W>(whitePawns) & whitePawns)) {
@@ -257,6 +266,22 @@ namespace {
 				return BLOCK_BISHOP_LIGHT;
 			else if(isBishopBlockade(pos, (~DarkSquares & whitePawns), blackPawns))
 				return BLOCK_BISHOP_DARK;
+		}
+	}
+	
+	if(wcount >= 3 && bcount >= 3) {
+		// Sole pawns fencing
+		
+		Bitboard fenceWhite = shift_bb<DELTA_NW>(whiteBlocked) | shift_bb<DELTA_NE>(whiteBlocked) | blackBlocked;
+		
+		Bitboard b = Rank2BB & ~fenceWhite;
+		
+		for(int r = 3; r < 8 && b; r++) {
+			b = (shift_bb<DELTA_N>(b) | shift_bb<DELTA_NE>(b) | shift_bb<DELTA_NW>(b)) & ~fenceWhite;
+		}
+		
+		if(!b) {
+			return BLOCK_KP;
 		}
 	}
 
