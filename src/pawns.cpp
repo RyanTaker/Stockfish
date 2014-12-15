@@ -227,6 +227,12 @@ namespace {
 	e->whiteTerritory = markTerritory<DELTA_S>(whitePawns);
 	e->blackTerritory = markTerritory<DELTA_N>(blackPawns);
 	
+	
+	
+	if((whitePawns & (shift_bb<DELTA_E>(whitePawns) | shift_bb<DELTA_W>(whitePawns)))
+	    || (blackPawns & (shift_bb<DELTA_E>(blackPawns) | shift_bb<DELTA_W>(blackPawns))))
+		return BLOCK_NONE;
+	
 	Bitboard wClog = shift_bb<DELTA_NW>(whitePawns) & shift_bb<DELTA_NE>(whitePawns);
 	Bitboard bClog = shift_bb<DELTA_SW>(blackPawns) & shift_bb<DELTA_SE>(blackPawns);
 	
@@ -235,43 +241,45 @@ namespace {
 
 	Bitboard whiteBlocked = whitePawns & bBack & ~(shift_bb<DELTA_NW>(whitePawns) | shift_bb<DELTA_NE>(whitePawns));
 	Bitboard blackBlocked = blackPawns & wBack & ~(shift_bb<DELTA_SW>(blackPawns) | shift_bb<DELTA_SE>(blackPawns));
+	
+	Bitboard whiteFree = whitePawns & ~whiteBlocked;
+	Bitboard blackFree = blackPawns & ~blackBlocked;
+	
+	if(whiteFree || blackFree)
+		return BLOCK_NONE; // Non-blocked will eventually be better supported.
 
-	// Shows that white and black pawns are identical and none are next to eachother
-	if(shift_bb<DELTA_N>(whitePawns) == blackPawns && !(shift_bb<DELTA_W>(whitePawns) & whitePawns)) {
-		if(wcount >= 7 && bcount >= 7) {
-			Bitboard connect = (shift_bb<DELTA_NE>(whitePawns) | shift_bb<DELTA_SE>(whitePawns)) & whitePawns;
+	if(wcount >= 7 && bcount >= 7) {
+		Bitboard connect = (shift_bb<DELTA_NE>(whitePawns) | shift_bb<DELTA_SE>(whitePawns)) & whitePawns;
 
-			if(wcount == 8 && bcount == 8 && popcount<Max15>(connect) == 7) { // Ideal blockades
-				return BLOCK_SIMPLE;
-			} else { // Possibly Sealable Blockade
-				Bitboard comb = shift_bb<DELTA_NW>(whitePawns) & shift_bb<DELTA_NE>(whitePawns);
-				Bitboard supp = shift_bb<DELTA_SE>(comb) | shift_bb<DELTA_SW>(comb);
+		if(wcount == 8 && bcount == 8 && popcount<Max15>(connect) == 7) { // Ideal blockades
+			return BLOCK_SIMPLE;
+		} else { // Possibly Sealable Blockade
+			Bitboard comb = shift_bb<DELTA_NW>(whitePawns) & shift_bb<DELTA_NE>(whitePawns);
+			Bitboard supp = shift_bb<DELTA_SE>(comb) | shift_bb<DELTA_SW>(comb);
 
-				Bitboard holes = (comb | supp) & ~whitePawns;
-				Bitboard filled = shift_bb<DELTA_N>(blackPawns) & holes;
-				
-				holes &= ~filled;
-				if(popcount<Max15>(holes) == 1) {
-					holes |= holes << 8;
-					holes |= holes >> 8;
+			Bitboard holes = (comb | supp) & ~whitePawns;
+			Bitboard filled = shift_bb<DELTA_N>(blackPawns) & holes;
+			
+			holes &= ~filled;
+			if(popcount<Max15>(holes) == 1) {
+				holes |= holes << 8;
+				holes |= holes >> 8;
 
-					e->blockCriticals = holes;
-					return BLOCK_SEALABLE;
-				}
+				e->blockCriticals = holes;
+				return BLOCK_SEALABLE;
 			}
-			
-			
-		} else if(wcount >= 4 && bcount >= 4) {
-			if(isBishopBlockade(pos, DarkSquares & whitePawns, blackPawns))
-				return BLOCK_BISHOP_LIGHT;
-			else if(isBishopBlockade(pos, (~DarkSquares & whitePawns), blackPawns))
-				return BLOCK_BISHOP_DARK;
 		}
+	}
+
+	if(wcount >= 4 && bcount >= 4) {
+		if(isBishopBlockade(pos, DarkSquares & whiteBlocked, blackBlocked))
+			return BLOCK_BISHOP_LIGHT;
+		else if(isBishopBlockade(pos, (~DarkSquares & whiteBlocked), blackBlocked))
+			return BLOCK_BISHOP_DARK;
 	}
 	
 	if(wcount >= 3 && bcount >= 3) {
 		// Sole pawns fencing
-		
 		Bitboard fenceWhite = shift_bb<DELTA_NW>(whiteBlocked) | shift_bb<DELTA_NE>(whiteBlocked) | blackBlocked;
 		
 		Bitboard b = Rank2BB & ~fenceWhite;
