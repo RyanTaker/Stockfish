@@ -194,26 +194,21 @@ namespace {
 	
 	return b;
   }
-  
-   bool isBishopBlockade(const Position& pos, Bitboard relaventPawn, Bitboard enemyPawns) {
-		Bitboard wall = shift_bb<DELTA_NW>(relaventPawn) | shift_bb<DELTA_NE>(relaventPawn) | enemyPawns;
-		Bitboard rb;
-		
-		if((wall & Rank3BB) == Rank3BB)
-			rb = Rank3BB;
-		else if((wall & Rank4BB) == Rank4BB)
-			rb = Rank4BB;
-		else if((wall & Rank5BB) == Rank5BB)
-			rb = Rank5BB;
-		else if((wall & Rank6BB) == Rank6BB)
-			rb = Rank6BB;
-		else if((wall & Rank7BB) == Rank7BB)
-			rb = Rank7BB;
-		else
-			return false;
 
-		Bitboard relv = rb & enemyPawns;
-		return relv == (rb & DarkSquares) || relv == (rb & DarkSquares);
+  template<bool allowNorth>
+   bool isFence(Bitboard sqrs, Bitboard blockers) {
+   		Bitboard b = Rank2BB & ~blockers & sqrs;
+		
+		for(int r = 3; r < 8 && b; r++) {
+			Bitboard move = shift_bb<DELTA_NE>(b) | shift_bb<DELTA_NW>(b);
+		
+			if(allowNorth)
+				move |= shift_bb<DELTA_N>(b);
+		
+			b = move & ~blockers;
+		}
+
+		return !b;
    }
   
   // Degree messured as a scale between 0(no blockade) and 255(total blockade)
@@ -227,8 +222,6 @@ namespace {
 	e->whiteTerritory = markTerritory<DELTA_S>(whitePawns);
 	e->blackTerritory = markTerritory<DELTA_N>(blackPawns);
 	
-	
-	
 	if((whitePawns & (shift_bb<DELTA_E>(whitePawns) | shift_bb<DELTA_W>(whitePawns)))
 	    || (blackPawns & (shift_bb<DELTA_E>(blackPawns) | shift_bb<DELTA_W>(blackPawns))))
 		return BLOCK_NONE;
@@ -239,11 +232,11 @@ namespace {
 	Bitboard bBack = shift_bb<DELTA_S>(blackPawns | bClog | whitePawns);
 	Bitboard wBack = shift_bb<DELTA_N>(whitePawns | wClog | whitePawns);
 
-	Bitboard whiteBlocked = whitePawns & bBack & ~(shift_bb<DELTA_NW>(whitePawns) | shift_bb<DELTA_NE>(whitePawns));
-	Bitboard blackBlocked = blackPawns & wBack & ~(shift_bb<DELTA_SW>(blackPawns) | shift_bb<DELTA_SE>(blackPawns));
-	
-	Bitboard whiteFree = whitePawns & ~whiteBlocked;
-	Bitboard blackFree = blackPawns & ~blackBlocked;
+	Bitboard whiteBlocked = whitePawns & bBack & ~(shift_bb<DELTA_NW>(blackPawns) | shift_bb<DELTA_NE>(blackPawns));
+	Bitboard blackBlocked = blackPawns & wBack & ~(shift_bb<DELTA_SW>(whitePawns) | shift_bb<DELTA_SE>(whitePawns));
+
+	Bitboard whiteFree = whitePawns & ~whiteBlocked & ~e->whiteTerritory;
+	Bitboard blackFree = blackPawns & ~blackBlocked & ~e->blackTerritory;
 	
 	if(whiteFree || blackFree)
 		return BLOCK_NONE; // Non-blocked will eventually be better supported.
@@ -270,30 +263,22 @@ namespace {
 			}
 		}
 	}
+	
+	Bitboard fenceWhite = shift_bb<DELTA_NW>(whiteBlocked) | shift_bb<DELTA_NE>(whiteBlocked) | blackBlocked;
+
+	if(!isFence<true>(~Bitboard(0), fenceWhite))
+		return BLOCK_NONE;
+	
+	// From here on out, we know that the king cannot pass the fence.
 
 	if(wcount >= 4 && bcount >= 4) {
-		if(isBishopBlockade(pos, DarkSquares & whiteBlocked, blackBlocked))
+		if(isFence<false>(~DarkSquares, blackBlocked))
 			return BLOCK_BISHOP_LIGHT;
-		else if(isBishopBlockade(pos, (~DarkSquares & whiteBlocked), blackBlocked))
+		else if(isFence<false>(DarkSquares, blackBlocked))
 			return BLOCK_BISHOP_DARK;
 	}
 	
-	if(wcount >= 3 && bcount >= 3) {
-		// Sole pawns fencing
-		Bitboard fenceWhite = shift_bb<DELTA_NW>(whiteBlocked) | shift_bb<DELTA_NE>(whiteBlocked) | blackBlocked;
-		
-		Bitboard b = Rank2BB & ~fenceWhite;
-		
-		for(int r = 3; r < 8 && b; r++) {
-			b = (shift_bb<DELTA_N>(b) | shift_bb<DELTA_NE>(b) | shift_bb<DELTA_NW>(b)) & ~fenceWhite;
-		}
-		
-		if(!b) {
-			return BLOCK_KP;
-		}
-	}
-
-    return BLOCK_NONE;
+	return BLOCK_KP;
   }
 } // namespace
 

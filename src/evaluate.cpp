@@ -721,7 +721,10 @@ namespace {
 				return Value(0);
 			}
 		}
-		if(!(pos.count<KNIGHT>(attacker) + pos.count<ROOK>(attacker) + pos.count<QUEEN>(attacker))) {
+		
+		int nonBishopCount = pos.count<KNIGHT>(attacker) + pos.count<ROOK>(attacker) + pos.count<QUEEN>(attacker);
+		
+		if(!nonBishopCount) {
 				Bitboard wBishops = pos.pieces(WHITE, BISHOP);
 				Bitboard bBishops = pos.pieces(BLACK, BISHOP);
 
@@ -732,10 +735,12 @@ namespace {
 						return Value(0);
 				}
 		}
-		if(!(pos.count<KNIGHT>(attacker) + pos.count<BISHOP>(attacker) + pos.count<ROOK>(attacker) + pos.count<QUEEN>(attacker))) {
-			if(!(pos.pieces(attacker, KING) & weakTerritory) &&  !(pos.pieces(defender, KING) & strongTerritory))
+		
+		int pieceCount = nonBishopCount + pos.count<BISHOP>(attacker);
+		
+		if(ei.pi->blockadeType == BLOCK_KP && !pieceCount
+			&& !(pos.pieces(attacker, KING) & weakTerritory) &&  !(pos.pieces(defender, KING) & strongTerritory))
 				return Value(0);
-		}
 	}
 
     score += apply_weight(ei.pi->pawns_value(), Weights[PawnStructure]);
