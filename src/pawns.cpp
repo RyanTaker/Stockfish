@@ -188,11 +188,12 @@ namespace {
 
   template <Square delta>
   Bitboard markTerritory(Bitboard b) {
-	for(int i = 0; i < 6; i++) {
-		b |= shift_bb<delta>(b);
+	Bitboard ter = shift_bb<delta>(b);
+	for(int i = 0; i < 5; i++) {
+		ter |= shift_bb<delta>(ter);
 	}
-	
-	return b;
+
+	return ter;
   }
 
   template<bool allowNorth>
@@ -258,6 +259,8 @@ namespace {
 				holes |= holes << 8;
 				holes |= holes >> 8;
 
+				Bitboard sealFence = 
+				
 				e->blockCriticals = holes;
 				return BLOCK_SEALABLE;
 			}
